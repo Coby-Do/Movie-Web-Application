@@ -8,6 +8,7 @@ from django.dispatch import receiver
 class Movie(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField()
+    movie_poster_url = models.URLField(max_length=200)
     year = models.IntegerField()
     runtime = models.IntegerField()
     rating = models.CharField(max_length=100)
