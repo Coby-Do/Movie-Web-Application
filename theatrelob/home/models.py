@@ -4,7 +4,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 # Create your models here.
 from django.contrib.auth.models import User
-from pinax.badges.base import Badge
+# from pinax.badges.base import Badge
 
 class Movie(models.Model):
     title = models.CharField(max_length=100)
@@ -52,24 +52,24 @@ def create_user_profile(sender, instance, created, **kwargs):
 def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
 
-class MyBadge(Badge):
-    slug = "my-badge"
+# class MyBadge(Badge):
+#     slug = "my-badge"
 
-    # Levels of difficulty for acheivement requirements
-    levels = [
-        {"name": "Bronze", "tickets": 1},
-        {"name": "Silver", "tickets": 2},
-        {"name": "Gold", "tickets": 3},
-    ]
+#     # Levels of difficulty for acheivement requirements
+#     levels = [
+#         {"name": "Bronze", "tickets": 1},
+#         {"name": "Silver", "tickets": 2},
+#         {"name": "Gold", "tickets": 3},
+#     ]
 
-    # When a badge is awarded, the award method is called to update a user's profile
-    def award(self, **state):
-        user = state["user"]
-        level = state["level"]["name"]
-        message = f"{level} level {self.name} badge awarded!"
-        user.profile.badges[self.slug] = level
-        user.profile.save()
-        return message
+#     # When a badge is awarded, the award method is called to update a user's profile
+#     def award(self, **state):
+#         user = state["user"]
+#         level = state["level"]["name"]
+#         message = f"{level} level {self.name} badge awarded!"
+#         user.profile.badges[self.slug] = level
+#         user.profile.save()
+#         return message
 
 # Defining a user's profile and storing each badge in a dictionary
 # class UserProfile(models.Model):
