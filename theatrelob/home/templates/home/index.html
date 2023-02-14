@@ -20,113 +20,11 @@
       data-ride="carousel"
     >
       <div class="carousel-inner">
-        <div class="carousel-item active">
-          <div class="row">
-            <div class="col-lg-4">
-              <img
-                src="{{ movies.0.movie_poster_url }}"
-                alt="Movie Poster"
-                width="200"
-                height="300"
-              />
-              <h5 class="card-title">{{ movies.0.title }}</h5>
-              <p class="card-text">{{ movies.0.description }}</p>
-            </div>
-            <div class="col-lg-4">
-              <img
-                src="{{ movies.1.movie_poster_url }}"
-                alt="Movie Poster"
-                width="200"
-                height="300"
-              />
-              <h5 class="card-title">{{ movies.1.title }}</h5>
-              <p class="card-text">{{ movies.1.description }}</p>
-            </div>
-            <div class="col-lg-4">
-              <img
-                src="{{ movies.2.movie_poster_url }}"
-                alt="Movie Poster"
-                width="200"
-                height="300"
-              />
-              <h5 class="card-title">{{ movies.2.title }}</h5>
-              <p class="card-text">{{ movies.2.description }}</p>
-            </div>
-          </div>
-        </div>
+        {% for movie_list in movies|slice:"1:" %}
         <div class="carousel-item">
           <div class="row">
-            <div class="col-lg-4">
-              <img
-                src="{{ movies.3.movie_poster_url }}"
-                alt="Movie Poster"
-                width="200"
-                height="300"
-              />
-              <h5 class="card-title">{{ movies.0.title }}</h5>
-              <p class="card-text">{{ movies.0.description }}</p>
-            </div>
-            <div class="col-lg-4">
-              <img
-                src="{{ movies.4.movie_poster_url }}"
-                alt="Movie Poster"
-                width="200"
-                height="300"
-              />
-              <h5 class="card-title">{{ movies.1.title }}</h5>
-              <p class="card-text">{{ movies.1.description }}</p>
-            </div>
-            <div class="col-lg-4">
-              <img
-                src="{{ movies.5.movie_poster_url }}"
-                alt="Movie Poster"
-                width="200"
-                height="300"
-              />
-              <h5 class="card-title">{{ movies.2.title }}</h5>
-              <p class="card-text">{{ movies.2.description }}</p>
-            </div>
-          </div>
-        </div>
-        <div class="carousel-item">
-          <div class="row">
-            <div class="col-lg-4">
-              <img
-                src="{{ movies.6.movie_poster_url }}"
-                alt="Movie Poster"
-                width="200"
-                height="300"
-              />
-              <h5 class="card-title">{{ movies.0.title }}</h5>
-              <p class="card-text">{{ movies.0.description }}</p>
-            </div>
-            <div class="col-lg-4">
-              <img
-                src="{{ movies.7.movie_poster_url }}"
-                alt="Movie Poster"
-                width="200"
-                height="300"
-              />
-              <h5 class="card-title">{{ movies.1.title }}</h5>
-              <p class="card-text">{{ movies.1.description }}</p>
-            </div>
-            <div class="col-lg-4">
-              <img
-                src="{{ movies.8.movie_poster_url }}"
-                alt="Movie Poster"
-                width="200"
-                height="300"
-              />
-              <h5 class="card-title">{{ movies.2.title }}</h5>
-              <p class="card-text">{{ movies.2.description }}</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- TODO: work on this logic to simplify code -->
-        <!-- <div class="carousel-item">
-          <div class="row">
-            {% for movie in movies|slice:"1:" %}
+            <!-- Get three of the movies -->
+            {% for movie in movie_list %}
             <div class="col-lg-4">
               <img
                 src="{{ movie.movie_poster_url }}"
@@ -139,7 +37,8 @@
             </div>
             {% endfor %}
           </div>
-        </div> -->
+        </div>
+        {% endfor %}
 
         <a
           class="carousel-control-prev"

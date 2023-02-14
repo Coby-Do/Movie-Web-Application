@@ -15,12 +15,16 @@ def index(request):
         secrets = json.load(f)
         tmdb.API_KEY = secrets['tmdb_api_key']
     movies = tmdb.Movies().popular()  
-
+    batch_of_three_movies = []
     list_of_movies = []
     for movie in movies['results']:
         poster_url = 'https://image.tmdb.org/t/p/w500' + movie['poster_path']
         m = Movie(title=movie['title'], description=movie['overview'], movie_poster_url=poster_url)
-        list_of_movies.append(m)
+       
+        batch_of_three_movies.append(m)
+        if len(batch_of_three_movies) == 3:
+            list_of_movies.append(batch_of_three_movies)
+            batch_of_three_movies = []
 
     print(list_of_movies)
     # get image url
