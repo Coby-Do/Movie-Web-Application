@@ -20,6 +20,43 @@
       data-ride="carousel"
     >
       <div class="carousel-inner">
+        <!--For loop to show 3 movies-->
+        <!-- TODO: work on this logic to simplify code -->
+        <div class="carousel-item active">
+          <div class="row">
+            <div class="col-lg-4">
+              <img
+                src="{{ movies.0.0.movie_poster_url }}"
+                alt="Movie Poster"
+                width="200"
+                height="300"
+              />
+              <h5 class="card-title">{{ movie.0.title }}</h5>
+              <p class="card-text">{{ movie.0.description }}</p>
+            </div>
+            <div class="col-lg-4">
+              <img
+                src="{{ movies.0.1.movie_poster_url }}"
+                alt="Movie Poster"
+                width="200"
+                height="300"
+              />
+              <h5 class="card-title">{{ movie.1.title }}</h5>
+              <p class="card-text">{{ movie.1.description }}</p>
+            </div>
+            <div class="col-lg-4">
+              <img
+                src="{{ movies.0.2.movie_poster_url }}"
+                alt="Movie Poster"
+                width="200"
+                height="300"
+              />
+              <h5 class="card-title">{{ movie.2.title }}</h5>
+              <p class="card-text">{{ movie.2.description }}</p>
+            </div>
+          </div>
+        </div>
+
         {% for movie_list in movies|slice:"1:" %}
         <div class="carousel-item">
           <div class="row">
