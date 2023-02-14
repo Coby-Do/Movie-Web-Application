@@ -10,4 +10,5 @@ urlpatterns = [
     path('add_to_watchlist', views.add_to_watchlist, name='add_to_watchlist'),
     # path('award_my_badge/', award_my_badge, name='award_my_badge'),
     # path('award_tickets/', award_tickets, name='award_tickets'),
+    path('randomrec/', views.randomrec, name='Random Movie Recommendation'),
 ]

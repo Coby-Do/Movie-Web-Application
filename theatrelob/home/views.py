@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.template import loader
 import json
+import random
 import tmdbsimple as tmdb
 from .models import Movie, Profile, WatchedItem
 from django.contrib.auth.decorators import login_required
@@ -102,3 +103,22 @@ def add_to_watchlist(request):
 #         return redirect('award_tickets')
 
 #     return render(request, 'badges/award_tickets.html')
+
+
+def randomrec(request):
+    with open('secrets.json') as f:
+        secrets = json.load(f)
+        tmdb.API_KEY = secrets['tmdb_api_key']
+
+    latestMovie = tmdb.Movies().latest()
+    movieId     = latestMovie['id']
+
+    randomNum   = random.randint(1, movieId)
+    randomMovie = tmdb.Movies(randomNum)
+
+    response         = randomMovie.info()
+    randomMovieTitle = randomMovie.title
+
+    context = {'randomMovieTitle': randomMovieTitle}
+
+    return render(request, 'home/randomrec.html', context) 
