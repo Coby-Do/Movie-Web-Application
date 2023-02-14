@@ -5,10 +5,10 @@ import json
 import tmdbsimple as tmdb
 from .models import Movie, Profile, WatchedItem
 from django.contrib.auth.decorators import login_required
-from pinax.badges.models import BadgeAward
-from .models import MyBadge
-from django.contrib import messages
-from django.contrib.auth.models import User
+# from pinax.badges.models import BadgeAward
+# from .models import MyBadge
+# from django.contrib import messages
+# from django.contrib.auth.models import User
 # from.models import UserProfile
 
 def index(request):
