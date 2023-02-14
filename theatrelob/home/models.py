@@ -20,6 +20,7 @@ class Movie(models.Model):
     genre = models.CharField(max_length=100)
     language = models.CharField(max_length=100)
     country = models.CharField(max_length=100)
+    tmdb_id = models.IntegerField()
 
     def __str__(self):
         return self.title
