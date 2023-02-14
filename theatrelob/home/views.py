@@ -1,13 +1,15 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.template import loader
 import json
 import tmdbsimple as tmdb
-from django.shortcuts import redirect
 from .models import Movie, Profile, WatchedItem
 from django.contrib.auth.decorators import login_required
-
-
+from pinax.badges.models import BadgeAward
+from .models import MyBadge
+from django.contrib import messages
+from django.contrib.auth.models import User
+# from.models import UserProfile
 
 def index(request):
     # display a movie from tmbd api
@@ -70,3 +72,33 @@ def add_to_watchlist(request):
     watched_item.save()
     # redirect to the watchlist page
     return redirect('watchlist')
+
+@login_required
+# Renders a view when a badge is rewarded to a user
+def award_my_badge(request):
+    badge = MyBadge(request.user)
+    award = badge.get_next_level()
+    message = badge.award(user=request.user, level=award)
+    BadgeAward.objects.create(badge=badge, user=request.user, level=award)
+
+    return render(request, "badges/award_my_badge.html", {"message": message})
+
+
+# @login_required
+# Renders a view when the user earns tickets
+# def award_tickets(request):
+#     if request.method == 'POST':
+#         user = request.user
+#         num_tickets = request.POST.get('num_tickets')
+
+#         # Update the user's profile with the awarded tickets
+#         profile = UserProfile.objects.get(user=user)
+#         profile.tickets += int(num_tickets)
+#         profile.save()
+
+#         # Display a success message
+#         messages.success(request, f"{num_tickets} tickets awarded to {user.username}")
+
+#         return redirect('award_tickets')
+
+#     return render(request, 'badges/award_tickets.html')

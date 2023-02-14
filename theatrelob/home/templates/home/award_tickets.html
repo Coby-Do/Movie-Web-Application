@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Awarding Tickets</title>
+    </head>
+
+    <body>
+        {% block content %}
+            {% comment %} Displaying the number of tickets a user just earned {% endcomment %}
+            <div class="container">
+                <h1>Award Tickets</h1>
+                <p> Congratulations {{ user.username}}, you earned {{ num_tickets }} tickets and your total is now {{ user.profile.tickets }} tickets!
+            </div>
+        {% endblock %}
+
+    </body>
+</html>
