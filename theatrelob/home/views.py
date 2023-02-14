@@ -73,15 +73,15 @@ def add_to_watchlist(request):
     # redirect to the watchlist page
     return redirect('watchlist')
 
-@login_required
-# Renders a view when a badge is rewarded to a user
-def award_my_badge(request):
-    badge = MyBadge(request.user)
-    award = badge.get_next_level()
-    message = badge.award(user=request.user, level=award)
-    BadgeAward.objects.create(badge=badge, user=request.user, level=award)
+# @login_required
+# # Renders a view when a badge is rewarded to a user
+# def award_my_badge(request):
+#     badge = MyBadge(request.user)
+#     award = badge.get_next_level()
+#     message = badge.award(user=request.user, level=award)
+#     BadgeAward.objects.create(badge=badge, user=request.user, level=award)
 
-    return render(request, "badges/award_my_badge.html", {"message": message})
+#     return render(request, "badges/award_my_badge.html", {"message": message})
 
 
 # @login_required
