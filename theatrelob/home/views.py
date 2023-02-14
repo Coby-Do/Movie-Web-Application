@@ -19,14 +19,14 @@ def index(request):
     list_of_movies = []
     for movie in movies['results']:
         poster_url = 'https://image.tmdb.org/t/p/w500' + movie['poster_path']
-        m = Movie(title=movie['title'], description=movie['overview'], movie_poster_url=poster_url)
-       
+
+        m = Movie(title=movie['title'], description=movie['overview'], movie_poster_url=poster_url, tmdb_id=movie['id'])
         batch_of_three_movies.append(m)
         if len(batch_of_three_movies) == 3:
             list_of_movies.append(batch_of_three_movies)
             batch_of_three_movies = []
 
-    print(list_of_movies)
+    print(list_of_movies[0][1].tmdb_id)
     # get image url
     return render(request, 'home/index.html', {'movies': list_of_movies})
 
@@ -53,6 +53,7 @@ def add_to_watchlist(request):
     profile = Profile.objects.get(user_id=user_id)
     # get the movie's id
     movie_id = request.POST['movie_id']
+    print(movie_id)
     #if it doesn't exist, create it
     if not Movie.objects.filter(id=movie_id).exists():
         with open('secrets.json') as f:
@@ -60,12 +61,12 @@ def add_to_watchlist(request):
             tmdb.API_KEY = secrets['tmdb_api_key']
         movie = tmdb.Movies(movie_id).info()
         poster_url = 'https://image.tmdb.org/t/p/w500' + movie['poster_path']
-        m = Movie(id=movie_id, title=movie['title'], description=movie['overview'], movie_poster_url=poster_url)
+        m = Movie(id=movie_id, title=movie['title'], description=movie['overview'], movie_poster_url=poster_url, tmdb_id=movie_id)
         m.save()
     # get the movie
     movie = Movie.objects.get(id=movie_id)
     # add the movie to the user's watchlist
-    watched_item = WatchedItem(user=profile.user, movie=movie)
+    watched_item = WatchedItem(user=profile.user, movie=movie, date_watched='2020-01-01')
     watched_item.save()
     # redirect to the watchlist page
     return redirect('watchlist')

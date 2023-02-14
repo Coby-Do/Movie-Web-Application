@@ -24,7 +24,16 @@
       </nav>
   </head>
   <body>
-    
+    <!-- list out all watched movies-->
+    {% for item in watched_items %}
+    <div class="card" style="width: 18rem;">
+      <img class="card-img-top" src="{{item.movie.movie_poster_url}}" alt="Card image cap">
+      <div class="card-body">
+        <h5 class="card-title">{{item.movie.title}}</h5>
+        <p class="card-text">{{item.movie.description}}</p>
+      </div>
+    {% endfor %}
+
     
 
   </body>
