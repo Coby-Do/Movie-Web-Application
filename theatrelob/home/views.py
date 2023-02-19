@@ -4,6 +4,7 @@ from django.template import loader
 import json
 import random
 import tmdbsimple as tmdb
+import requests
 from .models import Movie, Profile, WatchedItem
 from django.contrib.auth.decorators import login_required
 # from pinax.badges.models import BadgeAward
@@ -106,19 +107,44 @@ def add_to_watchlist(request):
 
 
 def randomrec(request):
+
+    adultFlag = True 
+
     with open('secrets.json') as f:
         secrets = json.load(f)
         tmdb.API_KEY = secrets['tmdb_api_key']
 
-    latestMovie = tmdb.Movies().latest()
-    movieId     = latestMovie['id']
+    latestMovieId = tmdb.Movies().latest()['id']
 
-    randomNum   = random.randint(1, movieId)
-    randomMovie = tmdb.Movies(randomNum)
+    while adultFlag == True:
+        randomNum = random.randint(1, latestMovieId)
+        print('randomNum is', randomNum)  # Debug statement
 
-    response         = randomMovie.info()
-    randomMovieTitle = randomMovie.title
+        while True:
+            try:
+                response = requests.get('https://api.themoviedb.org/3/movie/' + str(randomNum) + '?api_key=' + tmdb.API_KEY)
+                response.raise_for_status()
+                break
+            except requests.exceptions.HTTPError as error:
+                randomNum = random.randint(1, latestMovieId)
+                print('404 error')  # Debug statement
+                continue
 
-    context = {'randomMovieTitle': randomMovieTitle}
+        movie   = tmdb.Movies(randomNum)
+        movInfo = movie.info()
 
-    return render(request, 'home/randomrec.html', context) 
+        if movInfo['adult'] == False:
+            adultFlag = False
+        else:
+            print('Adult film!') # Debug statement
+
+    movTitle = movInfo['title']
+    poster   = movie.images()['posters']
+
+    if len(poster) != 0:
+        partPostUrl = poster[0]['file_path']
+        fullPostUrl = 'https://image.tmdb.org/t/p/original' + partPostUrl
+    else:
+        fullPostUrl = 'https://www.smileysapp.com/emojis/wailing-emoji.png'
+
+    return render(request, 'home/randomrec.html', {'movieTitle': movTitle, 'moviePoster': fullPostUrl}) 
