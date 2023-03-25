@@ -35,13 +35,21 @@ class Profile(models.Model):
         return self.user.username
     
 class WatchedItem(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     movie = models.ForeignKey(Movie, on_delete=models.CASCADE)
     date_watched = models.DateField()
 
     def __str__(self):
         return self.movie.title
 
+# create a model representing a third party integrationss
+class Integration(models.Model):
+    name = models.CharField(max_length=100)
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, null=True)
+    access_token = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):

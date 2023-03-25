@@ -1,10 +1,11 @@
+import datetime
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.template import loader
 import json
 import random
 import tmdbsimple as tmdb
-from .models import Movie, Profile, WatchedItem
+from .models import Integration, Movie, Profile, WatchedItem
 from django.contrib.auth.decorators import login_required
 # from pinax.badges.models import BadgeAward
 # from .models import MyBadge
@@ -29,7 +30,6 @@ def index(request):
             list_of_movies.append(batch_of_three_movies)
             batch_of_three_movies = []
 
-    print(list_of_movies[0][1].tmdb_id)
     # get image url
     return render(request, 'home/index.html', {'movies': list_of_movies})
 
@@ -43,20 +43,21 @@ def watchlist(request):
     # get the user's profile
     profile = Profile.objects.get(user_id=user_id)
     # get the user's watched items
-    watched_items = WatchedItem.objects.filter(user=profile.user)
+    watched_items = WatchedItem.objects.filter(profile=profile)
     
     # display the watched items
     return render(request, 'home/watchlist.html', {'watched_items': watched_items})
-    
+
+@login_required(login_url='accounts/login/')   
 def add_to_watchlist(request):
     # get the user's id
     user_id = request.user.id
 
     # get the user's profile
     profile = Profile.objects.get(user_id=user_id)
-    # get the movie's id
-    movie_id = request.POST['movie_id']
-    print(movie_id)
+    # make sure the movie isn't already in the user's watchlist
+        # get the movie's id
+    movie_id = request.POST.get('movie_id', False)
     #if it doesn't exist, create it
     if not Movie.objects.filter(id=movie_id).exists():
         with open('secrets.json') as f:
@@ -69,10 +70,30 @@ def add_to_watchlist(request):
     # get the movie
     movie = Movie.objects.get(id=movie_id)
     # add the movie to the user's watchlist
-    watched_item = WatchedItem(user=profile.user, movie=movie, date_watched='2020-01-01')
+    # get today's date
+    date = datetime.date.today()
+
+    watched_item = WatchedItem(profile=profile, movie=movie, date_watched=date)
     watched_item.save()
     # redirect to the watchlist page
     return redirect('watchlist')
+
+@login_required(login_url='accounts/login/')
+def get_access_token(request):
+    # get the user's id
+    user_id = request.user.id
+    access_token = request.POST['code']
+
+    # create an integration for the user
+    # get the profile
+    profile = Profile.objects.get(user_id=user_id)
+    integration = Integration(profile=profile, name="Test", access_token=access_token)
+    integration.save()
+
+
+    # return a json with the access token
+    return HttpResponse(json.dumps({'access_token': access_token}), content_type='application/json')
+
 
 # @login_required
 # # Renders a view when a badge is rewarded to a user
@@ -103,6 +124,8 @@ def add_to_watchlist(request):
 #         return redirect('award_tickets')
 
 #     return render(request, 'badges/award_tickets.html')
+
+
 
 
 def randomrec(request):
