@@ -23,6 +23,7 @@
       </div>
     </nav>
   </head>
+  
   <body>
     <!-- Display A Card Holding Movie Information-->
 
@@ -61,7 +62,6 @@
               />
               <h5 class="card-title">{{ movies.0.1.title }}</h5>
               <p class="card-text">{{ movies.0.1.description }}</p>
-              <p class="card-text">{{ movies.0.1.tmdb_id }}</p>
               <form method="post" action="{% url 'add_to_watchlist' %}">
                 {% csrf_token %}
                 <input type="hidden" name="movie_id" value="{{ movies.0.1.tmdb_id }}">
