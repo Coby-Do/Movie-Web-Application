@@ -4,10 +4,9 @@ from django.test import Client, TestCase
 from django.urls import reverse, resolve
 from home.views import index,watchlist,add_to_watchlist,randomrec
 from django.contrib.auth.models import User
+from home.models import Movie, Integration, UserProfile, WatchedItem, Badge
 
-from home.models import Movie, Integration, Profile, WatchedItem
-
-# Create your tests here.
+#Create your tests here.
 class TestWatchList(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -196,3 +195,194 @@ class TestUrls(TestCase):
     def test_award_tickets_url_is_resolved(self):
         url = reverse('award_ticets')
         self.assertEquals(resolve(url).func, award_tickets)
+
+
+
+class BadgeAndProfileTests(TestCase):
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username='testuser', password='testpassword')
+        self.user_profile, _ = UserProfile.objects.get_or_create(user=self.user)
+
+    # Black-box Tests
+
+    # My cool-cam has to do with badge implementation, to create designiated badges
+    # for users, each profile much be made. Therefore, I consider testing profiles as
+    # a part of my cool-cam feature.
+
+    # 2. Tests user login success - ACCEPTANCE TEST
+    def test_login_success(self):
+        response = self.client.post(reverse('login'), {
+            'username': 'testuser',
+            'password': 'testpassword'
+        })
+        self.assertEqual(response.status_code, 302)  # Redirection after successful login
+
+    # 3. Tests user registration - ACCEPTANCE TERST
+    def test_register_success(self):
+        response = self.client.post(reverse('register'), {
+            'username': 'newuser',
+            'password1': 'N3wP@ssw0rd!',
+            'password2': 'N3wP@ssw0rd!',
+        })
+        self.assertEqual(response.status_code, 302)  # Redirection after successful registration
+
+    # 4. Tests user logout - ACCEPTANCE TEST
+    def test_logout_success(self):
+        response = self.client.get(reverse('logout'))
+        self.assertEqual(response.status_code, 302)  # Redirection after successful logout
+
+    # White-box Tests
+
+    # Tests badge creation - Provides coverage for the Badge model creation
+    def test_create_badge(self):
+        # Creating the badge
+        badge = Badge.objects.create(name='Test Badge', description='Test Badge Description')
+
+        # Testing if the badge exists
+        self.assertEqual(badge.name, 'Test Badge')
+
+    # Testing resetting badges - Provides branch and statement coverage for the reset_user_badges view
+    def test_reset_badges(self):
+        # Creating the badge and adding it to the user's profile
+        badge = Badge.objects.create(name='Test Badge', description='Test Badge Description')
+        self.user_profile.badges.add(badge)
+
+        # Logging into the test client
+        self.client.login(username='testuser', password='testpassword')
+
+        # Sending a request to the rest_user_badges view
+        response = self.client.post(reverse('reset_user_badges'))
+
+        # Refresh the user_profile object to get updated data
+        self.user_profile.refresh_from_db()
+
+        # Checking to see if the badges has been reset
+        self.assertEqual(self.user_profile.badges.count(), 0)
+        self.assertEqual(response.status_code, 302) 
+
+    # Testing badge list to display badges - Provides statement coverage for badge_list view
+    def test_badge_list_display(self):
+        # Logging into the test client
+        self.client.login(username='testuser', password='testpassword')
+
+        # Creating the badges
+        Badge.objects.create(name='Test Badge 1', description='Test Badge Description 1')
+        Badge.objects.create(name='Test Badge 2', description='Test Badge Description 2')
+
+        # Sending a request to the badge_list view
+        response = self.client.get(reverse('badge_list'))
+        self.assertEqual(response.status_code, 200)
+
+        # Checking if the badges exist on the badge list display
+        self.assertContains(response, 'Test Badge 1')
+        self.assertContains(response, 'Test Badge 2')
+
+    # Tests viewing profile - Provides statement coverage for profile view
+    def test_view_profile(self):
+        # Logging into the test client
+        self.client.login(username='testuser', password='testpassword')
+        response = self.client.get(reverse('profile', args=[self.user.username]))
+
+        # Check if the response status code is successful
+        self.assertEqual(response.status_code, 200)
+
+        # Check if it contains the correct user's profile
+        self.assertContains(response, self.user.username)
+
+    # Testing number of movies watched - Provides statement coverage for UserProfile's movies_watched function
+    def test_number_of_movies_watched(self):
+        # Set the movies watched and save it to the user's profile
+        self.user_profile.movies_watched = 2
+        self.user_profile.save()
+
+        # Get the user's profile from the database
+        user_profile_from_db = UserProfile.objects.get(user=self.user)
+
+        # Check if the movies_watched attribute matches the expected value
+        self.assertEqual(user_profile_from_db.movies_watched, 2)
+
+    # Testing earned badges displayed under 'Earned Badges' on profile page - Provides statement coverage for profile view when displaying earned badges
+    def test_earned_badges_display(self):
+        # Creating the badge
+        badge = Badge.objects.create(name='Test Badge', description='Test Badge Description')
+
+        # Add the badge to the user's profile
+        self.user_profile.badges.add(badge)
+
+        # Logging into the test client
+        self.client.login(username='testuser', password='testpassword')
+        response = self.client.get(reverse('profile', args=[self.user.username]))
+
+        # Check if the badge is displayed
+        self.assertContains(response, 'Test Badge')
+
+
+    # Testing deleting badges - Provides statement coverage for the delete_badges view
+    def test_delete_badges(self):
+        # Creating the badges
+        Badge.objects.create(name='Test Badge 1', description='Test Badge Description 1')
+        Badge.objects.create(name='Test Badge 2', description='Test Badge Description 2')
+
+        # Sending a request to the delete_badges view
+        response = self.client.get(reverse('delete_badges'))
+
+        # Check if the response status code is successful
+        self.assertEqual(response.status_code, 200)
+
+        # Check if all badges have been deleted from the database
+        self.assertEqual(Badge.objects.count(), 0)
+
+    # Testing Genre Enthusiast badge - Provides function coverage for GE badge from the check_badges function
+    def test_genre_enthusiast_badge(self):
+        # Create the Genre Enthusiast badge
+        genre_enthusiast_badge = Badge.objects.create(
+            name='Genre Enthusiast',
+            description='Watched movies from 5 different genres.',
+            badge_type='genres_watched',
+            requirement=5
+        )
+
+        # Manually updating the user's profile for different genres and checking if the requirements are met
+        self.user_profile.animated_movies_watched = 1
+        self.user_profile.check_badges()
+        self.user_profile.documentaries_watched = 1
+        self.user_profile.check_badges()
+        self.user_profile.action_movies_watched = 1
+        self.user_profile.check_badges()
+        self.user_profile.comedy_movies_watched = 1
+        self.user_profile.check_badges()
+        self.user_profile.romance_movies_watched = 1
+        self.user_profile.check_badges()
+
+        self.assertIn(genre_enthusiast_badge, self.user_profile.badges.all())
+
+    # Integration Test
+
+    # Testing badge creation, then checking if it's been displayed on the profile page
+    #   This is a bottom-up integration because it's testing the individual units first,
+    #   which are the Badge and UserProfile classes, then integrating them by testing
+    #   the badge's creation, badge list display, and earned badges display.
+    def test_badge_creation_and_display(self):
+        # Logging into the test client
+        self.client.login(username='testuser', password='testpassword')
+
+        # Creating the badges
+        badge1 = Badge.objects.create(name='Test Badge 1', description='Test Badge Description 1')
+        badge2 = Badge.objects.create(name='Test Badge 2', description='Test Badge Description 2')
+
+        # Testing badge display
+        response = self.client.get(reverse('badge_list'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Test Badge 1')
+        self.assertContains(response, 'Test Badge 2')
+
+        # Adding the badges to the user's profile
+        self.user_profile.badges.add(badge1)
+        self.user_profile.badges.add(badge2)
+
+        # Testing earned badges display on the profile page
+        response = self.client.get(reverse('profile', args=[self.user.username]))
+        self.assertContains(response, 'Test Badge 1')
+        self.assertContains(response, 'Test Badge 2')
