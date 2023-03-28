@@ -211,7 +211,7 @@ class BadgeAndProfileTests(TestCase):
     # for users, each profile much be made. Therefore, I consider testing profiles as
     # a part of my cool-cam feature.
 
-    # 2. Tests user login success - ACCEPTANCE TEST
+    # Tests user login success - ACCEPTANCE TEST
     def test_login_success(self):
         response = self.client.post(reverse('login'), {
             'username': 'testuser',
@@ -219,7 +219,7 @@ class BadgeAndProfileTests(TestCase):
         })
         self.assertEqual(response.status_code, 302)  # Redirection after successful login
 
-    # 3. Tests user registration - ACCEPTANCE TERST
+    # Tests user registration - ACCEPTANCE TERST
     def test_register_success(self):
         response = self.client.post(reverse('register'), {
             'username': 'newuser',
@@ -228,7 +228,7 @@ class BadgeAndProfileTests(TestCase):
         })
         self.assertEqual(response.status_code, 302)  # Redirection after successful registration
 
-    # 4. Tests user logout - ACCEPTANCE TEST
+    # Tests user logout - ACCEPTANCE TEST
     def test_logout_success(self):
         response = self.client.get(reverse('logout'))
         self.assertEqual(response.status_code, 302)  # Redirection after successful logout
