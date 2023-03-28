@@ -1,0 +1,9 @@
+{% block content %}
+    <h2>Movie Recommendation</h2>
+    <form method="post" action="{% url 'recommend_movie_view' %}">
+        {% csrf_token %}
+        <label for="user_movielist">Enter your movie list (comma separated):</label>
+        <input type="text" id="user_movielist" name="user_movielist" required>
+        <button type="submit">Get Recommendations</button>
+    </form>
+{% endblock %}

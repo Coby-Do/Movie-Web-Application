@@ -1,3 +1,4 @@
+import numpy as np
 import tmdbsimple as tmdb
 import pandas as pd
 from ast import literal_eval
@@ -9,7 +10,8 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 def recommend(movieslist, creditsfile, moviesfile):
     creditsfile.columns = ['id', 'title', 'cast', 'crew']  # takes only id, title, cast, and crew columns
-    moviesfile = moviesfile.merge(creditsfile, on="id")  # merges the dataframes using the id
+
+    moviesfile = moviesfile.merge(creditsfile, on="title")  # merges the dataframes using the id
     features = ["cast", "crew", "keywords", "genres"]  # build recommendation off these features
 
     for feature in features:  # converts data into usable structure. data is lists of strings until we convert
@@ -22,13 +24,13 @@ def recommend(movieslist, creditsfile, moviesfile):
 
     features = ['cast', 'keywords', 'director', 'genres']
     for feature in features:
-        moviesfile[feature] = movies_df[feature].apply(cleandata)  # removes spaces and lowercases everything
+        moviesfile[feature] = moviesfile[feature].apply(cleandata)  # removes spaces and lowercases everything
     moviesfile["phrases"] = moviesfile.apply(prepvectorizer, axis=1)
 
     countvectorizer = CountVectorizer(stop_words="english")
     countmatrix = countvectorizer.fit_transform(moviesfile["phrases"])
 
-    cosine_sim2 = cosine_similarity(count_matrix, count_matrix)
+    cosine_sim2 = cosine_similarity(countmatrix, countmatrix)
 
     moviesfile = moviesfile.reset_index()
     indices = pd.Series(moviesfile.index, index=moviesfile['title'])
@@ -39,7 +41,7 @@ def recommend(movieslist, creditsfile, moviesfile):
     simscore = simscore[1:11]
 
     moviesindices = [ind[0] for ind in simscore]
-    movies = moviesfile["title"].iloc[movies_indices]
+    movies = moviesfile["title"].iloc[moviesindices]
     return movies
 
 
@@ -81,3 +83,9 @@ def prepvectorizer(features):
     return ' '.join(features['keywords']) + ' ' + ' '.join(features['cast']) + ' ' + features[
         'director'] + ' ' + ' '.join(features['genres'])
 
+
+if __name__=='__main__':
+    path = "../home/static/csv/"
+    credits_file = pd.read_csv(path + "tmdb_5000_credits.csv")
+    movies_file = pd.read_csv(path + "tmdb_5000_movies.csv")
+    print(recommend("Up", credits_file, movies_file))
