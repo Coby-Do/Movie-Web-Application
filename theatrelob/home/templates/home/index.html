@@ -16,13 +16,33 @@
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
+
+      <!-- Login, Register, and Logout buttons-->
+      {% if user.is_authenticated %}
+        <form method="post" action="{% url 'logout' %}">
+          {% csrf_token %}
+          <button type="submit">Logout</button>
+        </form>
+      {% else %}
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'login' %}">Login</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'register' %}">Register</a>
+          </li>
+        </ul>
+      {% endif %}
+
+
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav">
- 
+
         </ul>
       </div>
     </nav>
   </head>
+  
   <body>
     <!-- Display A Card Holding Movie Information-->
 
@@ -61,7 +81,6 @@
               />
               <h5 class="card-title">{{ movies.0.1.title }}</h5>
               <p class="card-text">{{ movies.0.1.description }}</p>
-              <p class="card-text">{{ movies.0.1.tmdb_id }}</p>
               <form method="post" action="{% url 'add_to_watchlist' %}">
                 {% csrf_token %}
                 <input type="hidden" name="movie_id" value="{{ movies.0.1.tmdb_id }}">
@@ -78,12 +97,15 @@
               />
               <h5 class="card-title">{{ movies.0.2.title }}</h5>
               <p class="card-text">{{ movies.0.2.description }}</p>
-              <form method="post" action="{% url 'add_to_watchlist' %}">
-                {% csrf_token %}
-                <input type="hidden" name="movie_id" value="{{ movies.0.2.tmdb_id }}">
-            
-                <input type="submit" value="Add To Watchlist">
+                {% if user.is_authenticated %}
+                <form method="post" action="{% url 'add_to_watchlist' %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="movie_id" value="{{ movies.0.2.tmdb_id }}">
+                  <input type="submit" value="Add To Watchlist">
                 </form>
+                {% else %}
+                  <button onclick="window.location.href='{% url 'login' %}?next={{ request.path }}'">Add to Watchlist</button>
+                {% endif %}
             </div>
           </div>
         </div>
@@ -134,6 +156,15 @@
         </a>
       </div>
     </div>
+
+    {% if request.user.is_authenticated %}
+      <a href="{% url 'profile' username=request.user.username %}">
+          <button type="button">Go to Profile</button>
+      </a>
+    {% endif %}
+
+  
+  
 
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->

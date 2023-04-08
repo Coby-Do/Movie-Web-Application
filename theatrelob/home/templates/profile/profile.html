@@ -1,0 +1,47 @@
+<!-- profiles/templates/profiles/profile.html -->
+
+{% block content %}
+    <h2>{{ profile.user.username }}'s Profile</h2>
+    <p>Movies watched: {{ profile.movies_watched }}</p>
+
+    <h3>Earned Badges</h3>
+    <ul>
+        {% for badge in profile.badges.all %}
+        <li>{{ badge.name }}: {{ badge.description }}</li>
+        {% empty %}
+        <li>No badges earned yet.</li>
+        {% endfor %}
+    </ul>
+    <ul>
+        <button>
+            <a href="{% url 'watch_movie' %}">Watch a Movie</a>
+        </button>
+        <button>
+            <a href="{% url 'watch_animation' %}">Watch an Animation Movie</a>
+        </button>
+        <button>
+            <a href="{% url 'watch_documentary' %}">Watch a Documentary Movie</a>
+        </button>
+        <button>
+            <a href="{% url 'watch_action' %}">Watch a Action Movie</a>
+        </button>
+        <button>
+            <a href="{% url 'watch_comedy' %}">Watch a Comedy Movie</a>
+        </button>
+        <button>
+            <a href="{% url 'watch_romance' %}">Watch a Romance Movie</a>
+        </button>
+    </ul>
+    <ul>
+        <button>
+            <a href="{% url 'reset_user_badges' %}">Reset My Badges</a>
+        </button>
+        <button>
+            <a href="{% url 'badge_list' %}">View Badge List</a>
+        </button>
+        <button>
+            <a href="{% url 'index' %}" class="btn btn-primary">Return to Home</a>
+        </button>
+        </ul>
+
+{% endblock %}
