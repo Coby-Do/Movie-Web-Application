@@ -7,7 +7,7 @@ import random
 import tmdbsimple as tmdb
 from .models import Integration, Movie, WatchedItem
 import requests
-from .models import Movie, Profile, WatchedItem
+from .models import Movie, UserProfile, WatchedItem
 from django.contrib.auth.decorators import login_required
 #
 from django.shortcuts import render, get_object_or_404
