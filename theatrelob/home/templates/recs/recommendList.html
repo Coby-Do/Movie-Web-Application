@@ -1,0 +1,11 @@
+{% block content %}
+    <h2>Recommended Movies</h2>
+    <ul>
+        {% for movie in recommended_movies %}
+            <li>{{ movie.title }}</li>
+        {% empty %}
+            <li>No movies found.</li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'recommend_movies' %}">Get more recommendations</a>
+{% endblock %}
