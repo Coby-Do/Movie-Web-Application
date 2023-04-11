@@ -13,42 +13,48 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 # Create your models here.
 
-
 class Movie(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField()
     movie_poster_url = models.URLField(max_length=200)
-    year = models.IntegerField()
-    runtime = models.IntegerField()
-    rating = models.CharField(max_length=100)
-    metascore = models.IntegerField()
-    votes = models.IntegerField()
-    gross_earning_in_mil = models.IntegerField()
-    director = models.CharField(max_length=100)
-    actor = models.CharField(max_length=100)
-    genre = models.CharField(max_length=100)
-    language = models.CharField(max_length=100)
-    country = models.CharField(max_length=100)
+    year = models.IntegerField(null=True, blank=True)
+    runtime = models.IntegerField(null=True, blank=True)
+    rating = models.CharField(max_length=100, null=True, blank=True)
+    metascore = models.IntegerField(null=True, blank=True)
+    votes = models.IntegerField(null=True, blank=True)
+    gross_earning_in_mil = models.IntegerField(null=True, blank=True)
+    director = models.CharField(max_length=100, null=True, blank=True)
+    actor = models.CharField(max_length=100, null=True, blank=True)
+    genre = models.CharField(max_length=100, null=True, blank=True)
+    language = models.CharField(max_length=100, null=True, blank=True)
+    country = models.CharField(max_length=100, null=True, blank=True)
+    tmdb_id = models.IntegerField()
 
     def __str__(self):
         return self.title
 
-
-<<<<<<< Updated upstream
-class Profile(models.Model):
-=======
+class Badge(models.Model):
+    name = models.CharField(max_length=255)
+    description = models.TextField()
+    requirement = models.PositiveIntegerField(default=0)
+    badge_type = models.CharField(max_length=255, null=True, blank=True)
+    
     def __str__(self):
         return self.name
+    
 
 class UserProfile(models.Model):
->>>>>>> Stashed changes
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    bio = models.TextField()
+    bio = models.TextField(blank=True, null=True)  # Added bio field from Profile class
+    movies_watched = models.PositiveIntegerField(default=0)
+    animated_movies_watched = models.PositiveIntegerField(default=0)
+    documentaries_watched = models.PositiveIntegerField(default=0)
+    action_movies_watched = models.PositiveIntegerField(default=0)
+    comedy_movies_watched = models.PositiveIntegerField(default=0)
+    romance_movies_watched = models.PositiveIntegerField(default=0)
+    badges = models.ManyToManyField(Badge)
 
     def __str__(self):
-<<<<<<< Updated upstream
-        return self.user.username
-=======
         return f'{self.user.username} Profile'
 
     def award_badge(self, badge):
@@ -198,23 +204,29 @@ class MovieRecommender:
 
 #     def __str__(self):
 #         return self.user.username
->>>>>>> Stashed changes
-    
+
 class WatchedItem(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     movie = models.ForeignKey(Movie, on_delete=models.CASCADE)
     date_watched = models.DateField()
 
     def __str__(self):
         return self.movie.title
 
+# create a model representing a third party integrationss
+class Integration(models.Model):
+    name = models.CharField(max_length=100)
+    profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, null=True)
+    access_token = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
-        Profile.objects.create(user=instance)
+        UserProfile.objects.create(user=instance)
 
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
-    instance.profile.save()
-
+    instance.userprofile.save()

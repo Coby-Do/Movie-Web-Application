@@ -1,14 +1,12 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from . import views
+from .views import logout_view
 
 urlpatterns = [
     path('', views.index, name='index'),
-    path('watchlist', views.watchlist, name='watchlist'),
+    path('watchlist/', views.watchlist, name='watchlist'),
     path('accounts/login/', auth_views.LoginView.as_view(template_name='home/login.html')),
-<<<<<<< Updated upstream
-]
-=======
     path('add_to_watchlist', views.add_to_watchlist, name='add_to_watchlist'),
     path('get_access_token', views.get_access_token, name='get_access_token'),
     path('randomrec/', views.randomrec, name='Random Movie Recommendation'),
@@ -32,4 +30,4 @@ urlpatterns = [
     path('recommend_movie_view/', views.recommend_movie_view, name='recommendList'),
     path('recommend_movie_view/', views.recommend_movie_view, name='recommend_movie_view'),
 ]
->>>>>>> Stashed changes
+

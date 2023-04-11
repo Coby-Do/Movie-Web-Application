@@ -1,0 +1,15 @@
+<!-- profiles/templates/profiles/badge_list.html -->
+
+{% block content %}
+    <h2>Badge List</h2>
+    <ul>
+        {% for badge in badges %}
+            {% if badge in profile.badges.all %}
+                <li>{{ badge.name }}: {{ badge.description }} - <span style="color: #66FF00;"><strong>Completed</strong></span></li>
+            {% else %}
+                <li>{{ badge.name }}: {{ badge.description }} - <span style="color: red;"><strong>Uncompleted</strong></span></li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+    <a href="{% url 'profile' request.user.username %}" class="btn btn-primary">Return to Profile</a>
+{% endblock %}

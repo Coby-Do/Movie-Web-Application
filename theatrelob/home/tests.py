@@ -1,8 +1,11 @@
-from django.test import TestCase
+import datetime
+import json
+from django.test import Client, TestCase
+from django.urls import reverse, resolve
+from home.views import index,watchlist,add_to_watchlist,randomrec
+from django.contrib.auth.models import User
+from home.models import Movie, Integration, UserProfile, WatchedItem, Badge
 
-<<<<<<< Updated upstream
-# Create your tests here.
-=======
 #Create your tests here.
 class TestWatchList(TestCase):
     @classmethod
@@ -147,7 +150,6 @@ class TestUrls(TestCase):
         url = reverse('watchlist')
         self.assertEquals(resolve(url).func, watchlist)
 
-
     # Test Watchlist (the wrong parameter for reverse())
     def test_watchlist_url_is_resolved(self):
         url = reverse('wathlist')
@@ -203,12 +205,12 @@ class BadgeAndProfileTests(TestCase):
         self.user_profile, _ = UserProfile.objects.get_or_create(user=self.user)
 
     # Black-box Tests
-    #
     # My cool-cam has to do with badge implementation, to create designiated badges
     # for users, each profile much be made. Therefore, I consider testing profiles as
     # a part of my cool-cam feature.
-    #
-    # 2. Tests user login success - ACCEPTANCE TEST
+
+    # Tests user login success - ACCEPTANCE TEST
+
     def test_login_success(self):
         response = self.client.post(reverse('login'), {
             'username': 'testuser',
@@ -216,7 +218,8 @@ class BadgeAndProfileTests(TestCase):
         })
         self.assertEqual(response.status_code, 302)  # Redirection after successful login
 
-    # 3. Tests user registration - ACCEPTANCE TERST
+
+    # Tests user registration - ACCEPTANCE TERST
     def test_register_success(self):
         response = self.client.post(reverse('register'), {
             'username': 'newuser',
@@ -225,7 +228,9 @@ class BadgeAndProfileTests(TestCase):
         })
         self.assertEqual(response.status_code, 302)  # Redirection after successful registration
 
-    # 4. Tests user logout - ACCEPTANCE TEST
+
+    # Tests user logout - ACCEPTANCE TEST
+
     def test_logout_success(self):
         response = self.client.get(reverse('logout'))
         self.assertEqual(response.status_code, 302)  # Redirection after successful logout
@@ -257,7 +262,8 @@ class BadgeAndProfileTests(TestCase):
 
         # Checking to see if the badges has been reset
         self.assertEqual(self.user_profile.badges.count(), 0)
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 302) 
+
 
     # Testing badge list to display badges - Provides statement coverage for badge_list view
     def test_badge_list_display(self):
@@ -549,4 +555,4 @@ class ExtendedBadgeTests(TestCase):
         self.user_profile.check_badges()
 
         self.assertIn(twenty_movies_watched_badge, self.user_profile.badges.all()) # Should pass assert
->>>>>>> Stashed changes
+        
