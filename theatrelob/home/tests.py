@@ -2,9 +2,9 @@ import datetime
 import json
 from django.test import Client, TestCase
 from django.urls import reverse, resolve
-from home.views import index,watchlist,add_to_watchlist,randomrec
+from views import index,watchlist,add_to_watchlist,randomrec
 from django.contrib.auth.models import User
-from home.models import Movie, Integration, UserProfile, WatchedItem, Badge
+from models import Movie, Integration, UserProfile, WatchedItem, Badge
 
 #Create your tests here.
 class TestWatchList(TestCase):

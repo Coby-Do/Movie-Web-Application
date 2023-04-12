@@ -116,7 +116,7 @@ def get_access_token(request):
     return HttpResponse(json.dumps({'access_token': access_token}), content_type='application/json')
 
 def randomrec(request):
-     with open('secrets.json') as f:
+    with open('secrets.json') as f:
          secrets = json.load(f)
          tmdb.API_KEY = secrets['tmdb_api_key']
     latestMovie = tmdb.Movies().latest()
@@ -337,14 +337,14 @@ def watch_comedy(request):
 def recommend_movie_view(request):
     if request.method == "POST":
         user_movielist = request.POST.get("user_movielist")
-        print(os.getcwd())
-        #path = "static/csv"  # Creates path
-        movies_file = pd.read_csv("static/csv/tmdb_5000_movies.csv")
-        credits_file = pd.read_csv("static/csv/tmdb_5000_credits.csv")
+        csvmovies_path = os.path.join(os.path.dirname(__file__), 'tmdb_5000_movies.csv')
+        csvcredits_path = os.path.join(os.path.dirname(__file__), 'tmdb_5000_credits.csv')
+        movies_file = pd.read_csv(csvmovies_path)
+        credits_file = pd.read_csv(csvcredits_path)
         recommender = MovieRecommender(credits_file, movies_file)
         recommended_movies = recommender.recommend(user_movielist)
         display_movie = {"recommended_movies": recommended_movies}
-        return render(request, "home/templates/recs/recommendList.html", display_movie)
+        return render(request, "recs/recommendList.html", display_movie)
     else:
         return render(request, "recs/addMovies.html")
 

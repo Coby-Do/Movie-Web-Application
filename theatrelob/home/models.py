@@ -111,8 +111,8 @@ class UserProfile(models.Model):
     # For recommendations list
     def recommend_movies(self, movie, numofmovies=5):
         #path = "/static/csv/"  # Creates path
-        credits_file = pd.read_csv("static/csv/tmdb_5000_credits.csv")  # Uses panda to read file as a csv
-        movies_file = pd.read_csv("static/csv/tmdb_5000_movies.csv")
+        credits_file = pd.read_csv("tmdb_5000_credits.csv")  # Uses panda to read file as a csv
+        movies_file = pd.read_csv("tmdb_5000_movies.csv")
 
         recommender = MovieRecommender(credits_file, movies_file)  # Creates movie recommender object
         recommend_movies = recommender.recommend(movie)  # Calls recommender to recommend a movie
