@@ -38,7 +38,7 @@ TheaterLob is a web application that enables users to manage their watched movie
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/yourusername/movielog.git
+git clone https://github.com/Coby-Do/Movie-Web-Application.git
 ```
 
 2. Navigate to the project folder:
