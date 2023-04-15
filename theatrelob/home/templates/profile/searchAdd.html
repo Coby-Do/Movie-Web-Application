@@ -1,0 +1,9 @@
+{% block content %}
+    <h2>Search Movie</h2>
+    <form method="post" action="{% url 'addedMovie' %}">
+        {% csrf_token %}
+        <label for="user_movie_add">Enter a movie to search:</label>
+        <input type="text" id="user_movie_add" name="user_movie_add" required>
+        <button type="submit">Add</button>
+    </form>
+{% endblock %}

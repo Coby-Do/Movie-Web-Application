@@ -28,6 +28,6 @@ urlpatterns = [
     path('watch_romance/', views.watch_romance, name='watch_romance'),
     # For Recommending Movies
     path('recommend_movie_view/', views.recommend_movie_view, name='recommendList'),
-    path('recommend_movie_view/', views.recommend_movie_view, name='recommend_movie_view'),
+    path('movie_search_add/', views.movie_search_add, name='addedMovie'),
 ]
 

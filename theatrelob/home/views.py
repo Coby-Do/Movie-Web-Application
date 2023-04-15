@@ -348,3 +348,54 @@ def recommend_movie_view(request):
     else:
         return render(request, "recs/addMovies.html")
 
+# For searching and adding movies to the movie list
+def movie_search_add(request):
+    if request.method == "POST":
+        # Get the movie to add in a string
+        user_movie_add = request.POST.get("user_movie_add")
+        user_movie_add = str(user_movie_add)
+        # get the user's id
+        user_id = request.user.id
+
+        # get the user's profile
+        profile = UserProfile.objects.get(user_id=user_id)
+
+        search = tmdb.Search()
+
+        if user_movie_add is not None:
+            with open('secrets.json') as f:
+                secrets = json.load(f)
+                tmdb.API_KEY = secrets['tmdb_api_key']
+
+            # Searches for movie and gets the id of the top result
+            response = search.movie(query=user_movie_add)
+            movie_id = search.results[0]['id']
+
+            # check if the movie exists in the database
+            if not Movie.objects.filter(id=movie_id).exists():
+                # Gets the movie info using the movie id
+                movie = tmdb.Movies(movie_id).info()
+
+                # Gets the poster url
+                poster_url = 'https://image.tmdb.org/t/p/w500' + movie['poster_path']
+                m = Movie(id=movie_id, title=movie['title'], description=movie['overview'], movie_poster_url=poster_url, tmdb_id=movie_id)
+                m.save()
+
+            # get the movie
+            movie = Movie.objects.get(id=movie_id)
+
+            # add the movie to the user's watchlist
+            date = datetime.date.today()
+
+            watched_item = WatchedItem(profile=profile, movie=movie, date_watched=date)
+            watched_item.save()
+
+            # redirect to the success page
+            return render(request, "profile/addedMovie.html")
+    else:
+        return render(request, "profile/searchAdd.html")
+
+
+
+
+
