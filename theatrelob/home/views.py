@@ -7,9 +7,15 @@ import random
 import tmdbsimple as tmdb
 from .models import Integration, Movie, WatchedItem
 from django.contrib.auth.decorators import login_required
+
+# For recommend
+import pandas as pd
+import os
+from django.conf import settings
+
 #
 from django.shortcuts import render, get_object_or_404
-from .models import UserProfile
+from .models import UserProfile, MovieRecommender
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
 from .models import Badge
@@ -26,7 +32,7 @@ def index(request):
     with open('secrets.json') as f:
         secrets = json.load(f)
         tmdb.API_KEY = secrets['tmdb_api_key']
-    movies = tmdb.Movies().popular()  
+    movies = tmdb.Movies().popular()
     batch_of_three_movies = []
     list_of_movies = []
     for movie in movies['results']:
@@ -52,7 +58,7 @@ def watchlist(request):
     profile = UserProfile.objects.get(user_id=user_id)
     # get the user's watched items
     watched_items = WatchedItem.objects.filter(profile=profile)
-    
+
     # display the watched items
     return render(request, 'home/watchlist.html', {'watched_items': watched_items})
 
@@ -111,8 +117,8 @@ def get_access_token(request):
 
 def randomrec(request):
     with open('secrets.json') as f:
-        secrets = json.load(f)
-        tmdb.API_KEY = secrets['tmdb_api_key']
+         secrets = json.load(f)
+         tmdb.API_KEY = secrets['tmdb_api_key']
     latestMovie = tmdb.Movies().latest()
     movieId     = latestMovie['id']
 
@@ -154,7 +160,6 @@ def register(request):
         form = UserCreationForm()
     return render(request, 'profile/register.html', {'form': form})
 
-    
 def profile(request, username):
     if request.user.is_authenticated and request.user.username == username:
         user_profile = UserProfile.objects.get(user=request.user)
@@ -292,7 +297,7 @@ def watch_documentary(request):
         return redirect('profile', request.user.username)
     else:
         return HttpResponseRedirect(reverse('index'))
-    
+
 def watch_action(request):
     if request.user.is_authenticated:
         user_profile = UserProfile.objects.get(user=request.user)
@@ -304,7 +309,6 @@ def watch_action(request):
         return redirect('profile', request.user.username)
     else:
         return HttpResponseRedirect(reverse('index'))
-    
 
 def watch_romance(request):
     if request.user.is_authenticated:
@@ -317,7 +321,6 @@ def watch_romance(request):
         return redirect('profile', request.user.username)
     else:
         return HttpResponseRedirect(reverse('index'))
-    
 
 def watch_comedy(request):
     if request.user.is_authenticated:
@@ -330,3 +333,69 @@ def watch_comedy(request):
         return redirect('profile', request.user.username)
     else:
         return HttpResponseRedirect(reverse('index'))
+
+def recommend_movie_view(request):
+    if request.method == "POST":
+        user_movielist = request.POST.get("user_movielist")
+        csvmovies_path = os.path.join(os.path.dirname(__file__), 'tmdb_5000_movies.csv')
+        csvcredits_path = os.path.join(os.path.dirname(__file__), 'tmdb_5000_credits.csv')
+        movies_file = pd.read_csv(csvmovies_path)
+        credits_file = pd.read_csv(csvcredits_path)
+        recommender = MovieRecommender(credits_file, movies_file)
+        recommended_movies = recommender.recommend(user_movielist)
+        display_movie = {"recommended_movies": recommended_movies}
+        return render(request, "recs/recommendList.html", display_movie)
+    else:
+        return render(request, "recs/addMovies.html")
+
+# For searching and adding movies to the movie list
+def movie_search_add(request):
+    if request.method == "POST":
+        # Get the movie to add in a string
+        user_movie_add = request.POST.get("user_movie_add")
+        user_movie_add = str(user_movie_add)
+        # get the user's id
+        user_id = request.user.id
+
+        # get the user's profile
+        profile = UserProfile.objects.get(user_id=user_id)
+
+        search = tmdb.Search()
+
+        if user_movie_add is not None:
+            with open('secrets.json') as f:
+                secrets = json.load(f)
+                tmdb.API_KEY = secrets['tmdb_api_key']
+
+            # Searches for movie and gets the id of the top result
+            response = search.movie(query=user_movie_add)
+            movie_id = search.results[0]['id']
+
+            # check if the movie exists in the database
+            if not Movie.objects.filter(id=movie_id).exists():
+                # Gets the movie info using the movie id
+                movie = tmdb.Movies(movie_id).info()
+
+                # Gets the poster url
+                poster_url = 'https://image.tmdb.org/t/p/w500' + movie['poster_path']
+                m = Movie(id=movie_id, title=movie['title'], description=movie['overview'], movie_poster_url=poster_url, tmdb_id=movie_id)
+                m.save()
+
+            # get the movie
+            movie = Movie.objects.get(id=movie_id)
+
+            # add the movie to the user's watchlist
+            date = datetime.date.today()
+
+            watched_item = WatchedItem(profile=profile, movie=movie, date_watched=date)
+            watched_item.save()
+
+            # redirect to the success page
+            return render(request, "profile/addedMovie.html")
+    else:
+        return render(request, "profile/searchAdd.html")
+
+
+
+
+

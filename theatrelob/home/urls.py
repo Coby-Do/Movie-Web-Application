@@ -26,4 +26,8 @@ urlpatterns = [
     path('watch_action/', views.watch_action, name='watch_action'),
     path('watch_comedy/', views.watch_comedy, name='watch_comedy'),
     path('watch_romance/', views.watch_romance, name='watch_romance'),
+    # For Recommending Movies
+    path('recommend_movie_view/', views.recommend_movie_view, name='recommendList'),
+    path('movie_search_add/', views.movie_search_add, name='addedMovie'),
 ]
+
