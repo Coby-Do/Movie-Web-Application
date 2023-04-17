@@ -3,25 +3,47 @@
 <head>
     <title>Random Movie Recommendation Generator</title>         
     <style>
-        .hide{
+        .hide {
             display: none;
         }
 
         .show {
             display: block;
         }
- 
-        button#posterButton{
+
+        button#posterButton {
             bottom: 50%;
             left: 50%;
             margin: auto;
+            margin-right: 10px;
             position: absolute;
             transform: translateX(-50%);
             width: 150px;
         }
 
+        h2#movieTitle {
+            float: left;
+            /*margin-left: clac((100% - 300px) / 2);
+            /*margin: 0;
+            margin-left: 20%;
+            /*position: absolute;
+            text-align: left;
+            /*top: 50%;
+            transform: translateY(-50%);
+            width: calc((100% - 300px) / 2);*/
+        }
+
+        div#movieContainer {
+            /*margin: auto;
+            text-align: center;*/
+            overflow: hidden;
+            width: 100%;
+        }
+
         img#poster {
+            float: left;
             height: auto;
+            margin-right: 10px;
             width: 300px;
         }    
     </style>
@@ -38,24 +60,27 @@
         Reload the page to generate a new suggestion.
     </p>
 
-    <h2 id="movieTitle" class="hide"> {{movieTitle}}</h2>
-    <img id="poster" class="hide" src="{{ moviePoster }}" /> 
-
-    <!-- Button -->
     <button id="posterButton" class="show" onclick="displayRec()">Give me a rec!</button>
-    <!-- End of Button -->
+
+    <div id="movieContainer" class="hide">
+        <img id="poster" src="{{ moviePoster }}" /> 
+        <h2 id="movieTitle"> {{movieTitle}}</h2>
+    </div>
 
     <script> 
         function displayRec(){
-            var button = document.getElementById("posterButton")
-            var poster = document.getElementById("poster");
-            var title  = document.getElementById("movieTitle");
+            var button = document.getElementById("posterButton");
+            var container = document.getElementById("movieContainer");
+            /*var poster = document.getElementById("poster");
+            var title  = document.getElementById("movieTitle");*/
             button.classList.add("hide");
             button.classList.remove("show");
-            poster.classList.add("show");
+            container.classList.add("show");
+            container.classList.remove("hide");
+            /*poster.classList.add("show");
             poster.classList.remove("hide");
             title.classList.add("show");
-            title.classList.remove("hide");
+            title.classList.remove("hide");*/
         }
     </script>
 </body>

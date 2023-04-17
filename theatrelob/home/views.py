@@ -154,6 +154,10 @@ def randomrec(request):
 
     return render(request, 'home/randomrec.html', {'movieTitle': movTitle, 'moviePoster': fullPostUrl}) 
 
+def theaters(request):
+    temp = 0;
+    return render(request, 'home/theaters.html')
+
 # Profile views
 
 @login_required

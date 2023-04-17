@@ -9,7 +9,8 @@ urlpatterns = [
     path('accounts/login/', auth_views.LoginView.as_view(template_name='home/login.html')),
     path('add_to_watchlist', views.add_to_watchlist, name='add_to_watchlist'),
     path('get_access_token', views.get_access_token, name='get_access_token'),
-    path('randomrec/', views.randomrec, name='Random Movie Recommendation'),
+    path('randomrec/', views.randomrec, name='randomrec'),
+    path('theaters/', views.theaters, name='theaters'),
     # Handling profiles and badges
     path('logout/', logout_view, name='logout'),
     path('register/', views.register, name='register'),
