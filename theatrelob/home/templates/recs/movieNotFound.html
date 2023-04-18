@@ -4,7 +4,8 @@
     Try typing the full title, or being case-sensitive.
     </p>
     <button>
-        <a href="{% url 'recommendList' %}">Try To Recommend Again.</a>
+        <a href="{% url 'recommendList' %}">
+            Try To Recommend Again.</a>
     </button>
     <button>
     <a href="{% url 'profile' username=request.user.username%}">Return to Profile.</a>

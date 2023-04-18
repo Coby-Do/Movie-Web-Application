@@ -18,20 +18,18 @@ function trackProgress() {
         console.log("video.currentTime: " + video.currentTime);
         if (video.currentTime >= video.duration * 0.85) {
             console.log("Finished Movie");  
-            // make an API call to the server
-            // to send the video id and the current time
-
-
-            // get the movie title from the page, the data-uia is video-title
+            // send a message to the background script to send a rest call
+            // to the server
             var title = document.querySelector('[data-uia="video-title"]').innerText;
             console.log("title: " + title);
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", url + "/api/watch_movie", true);
-            xhr.setRequestHeader('Content-Type', 'application/json');
-            xhr.send(JSON.stringify({
-                "apiKey": apiKey,
-                "title": title,
-            }));
+            chrome.runtime.sendMessage({message: "finished,"+title}, function(response) {
+                console.log(response);  
+            });
+            // get the movie title from the page, the data-uia is video-title
+           
+            // do a simple post request to the server
+            
+    
             // remove the event listener
             video.removeEventListener('timeupdate', arguments.callee);
 
@@ -39,20 +37,6 @@ function trackProgress() {
     });
 }
 
-chrome.storage.sync.get(['apiKey'], function(result) {
-    console.log('Value currently is ' + result.apiKey);
-    if(result.apiKey != undefined)
-        apiKey = result.apiKey;
-    
-}
-);
-
-chrome.storage.sync.get(['url'], function(result) {
-    console.log('Value currently is ' + result.url);
-    if(result.url != undefined)
-        url = result.url;
-}
-);
 
 
 

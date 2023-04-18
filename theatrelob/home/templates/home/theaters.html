@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Theaters Near Me</title>
+
+        <script>
+            (g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({
+              key: "AIzaSyBeqij-KNScgFWmUslJryOY4u-yDhRem2s",
+            });
+        </script>
+
+        <style>
+            #map {
+                height: 100%;
+                width: 50%;
+            }
+            html, body {
+              height: 100%;
+              margin: 10px;
+              padding: 0;
+            }
+        </style>
+
+        <script async
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBeqij-KNScgFWmUslJryOY4u-yDhRem2s&callback=initMap&libraries=places">
+        </script>
+
+        <div id="map"></div>
+    </head>
+
+    <body>
+        <script>
+            var markers = [];
+            var searchRadius = '30000';
+
+            function initMap() {
+                const queryString = window.location.search;
+                const urlParams = new URLSearchParams(queryString);
+                const movieTitle = urlParams.get('search');
+
+                var movieShowing = "movie theaters showing " + movieTitle;
+
+                navigator.geolocation.getCurrentPosition(function(position){
+                    var userLocation = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+
+                    var map = new google.maps.Map(document.getElementById('map'), { 
+                        zoom: 8,
+                        center: userLocation
+                    });
+
+                    var service = new google.maps.places.PlacesService(map);
+
+                    service.textSearch({query: movieShowing, location: userLocation}, function(results, status){
+                        if (status === google.maps.places.PlacesServiceStatus.OK) {
+                            for (var i = 0; i < results.length; i++) {
+                                let place = results[i];
+                                let placeLocation = place.geometry.location;
+                                let placeMarker = new google.maps.Marker({
+                                    position: placeLocation,
+                                    map: map,
+                                    title: place.name
+                                });
+
+                                placeMarker.addListener('click', function(){
+                                    map.setZoom(15);
+                                    map.setCenter(placeMarker.getPosition());
+                                });
+
+                                markers.push(placeMarker);
+                            }
+                        }
+                    })
+                })
+            }
+        </script>
+    </body>
+</html>

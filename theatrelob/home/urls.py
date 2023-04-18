@@ -11,7 +11,12 @@ urlpatterns = [
     path('watchlist/', views.watchlist, name='watchlist'),
     path('add_to_watchlist', views.add_to_watchlist, name='add_to_watchlist'),
     path('get_access_token', views.get_access_token, name='get_access_token'),
-
+    path('randomrec/', views.randomrec, name='randomrec'),
+    path('theaters/', views.theaters, name='theaters'),
+    # Handling profiles and badges
+    path('delete_access_token', views.delete_access_token, name='delete_access_token'),
+    path('api/watch_movie', views.api_search_and_add, name='api_search_and_add'),
+    path('remove_from_watchlist', views.remove_from_watchlist, name='remove_from_watchlist'),
     # For Profiles, Logins, Logouts, Registrations
     path('logout/', logout_view, name='logout'),
     path('register/', views.register, name='register'),
