@@ -59,4 +59,26 @@
     </form>
     {% endif %}
 
+    <h3> Integrations </h3>
+    <button>
+        <a href="{% url 'get_access_token' %}">Create Access Token</a>
+    </button>
+    {% for integration in integrations %}
+    <ul>
+        <li>
+            <a>{{ integration.name }}</a>
+            <a> {{ integration.access_token }} </a>
+            <form method="post" action="{% url 'delete_access_token' %}">
+                {% csrf_token %}
+                <input type="hidden" name="access_token" value="{{ integration.access_token }}">
+            
+                <input type="submit" value="Delete">
+                </form>
+
+        </li>
+    </ul>
+    
+    {% endfor %}
+
+
 {% endblock %}

@@ -22,6 +22,11 @@
 
     "permissions": [
         "activeTab",
-        "storage"
-        ]
+        "storage",
+        "tabs"
+      ],
+
+      "host_permissions": [
+        "http://*/"
+      ]
   }

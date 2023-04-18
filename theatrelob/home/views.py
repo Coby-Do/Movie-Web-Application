@@ -9,6 +9,7 @@ from .models import Integration, Movie, WatchedItem, Genre
 from django.contrib.auth.decorators import login_required
 import pandas as pd
 import os
+import secrets
 from django.conf import settings
 from .models import UserProfile, MovieRecommender
 from django.contrib.auth.forms import UserCreationForm
@@ -19,6 +20,8 @@ from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.views import LoginView
+from django.views.decorators.csrf import csrf_exempt
+
 
 
 def index(request):
@@ -120,6 +123,11 @@ def add_to_watchlist(request):
             m = Movie.objects.get(tmdb_id=movie_id)
 
         # add the movie to the user's watchlist
+
+        # make sure the watched item doesn't already exist
+        if WatchedItem.objects.filter(profile=profile, movie=m).exists():
+            return redirect('watchlist')
+
         date = datetime.date.today()
 
         watched_item = WatchedItem(profile=profile, movie=m, date_watched=date)
@@ -131,6 +139,7 @@ def add_to_watchlist(request):
         # Update genre count for each genre in the movie
         for genre in m.genres.all():
             profile.update_genres_watched(genre.name)
+        
 
         profile.save()
 
@@ -142,17 +151,120 @@ def add_to_watchlist(request):
 def get_access_token(request):
     # get the user's id
     user_id = request.user.id
-    access_token = request.POST['code']
+    # generate a random access token
+    access_token = secrets.token_hex(16)
+
 
     # create an integration for the user
     # get the profile
     profile = UserProfile.objects.get(user_id=user_id)
-    integration = Integration(profile=profile, name="Test", access_token=access_token)
+    # get the date today and convert it to a string
+    date = datetime.date.today()
+    date = date.strftime("%Y-%m-%d")
+    integration = Integration(profile=profile, name=date, access_token=access_token)
     integration.save()
+    
+    # refresh the page
+    return redirect('profile/' + profile.user.username + '/')
 
+@login_required(login_url='accounts/login/')
+def delete_access_token(request):
+    # get the user's id
+    user_id = request.user.id
 
-    # return a json with the access token
-    return HttpResponse(json.dumps({'access_token': access_token}), content_type='application/json')
+    # get the user's profile
+    profile = UserProfile.objects.get(user_id=user_id)
+
+    # get the access token from the POST parameter
+    access_token = request.POST.get('access_token', None)
+
+    if access_token is not None:
+        # delete the integration
+        integration = Integration.objects.get(profile=profile, access_token=access_token)
+        integration.delete()
+    
+    # just refresh the page
+    return redirect('profile/' + profile.user.username + '/')
+
+@csrf_exempt
+def api_search_and_add(request):
+    # parse the body of the request as a json
+    body = json.loads(request.body)
+
+    # get the access token from the body
+    access_token = body['access_token']
+
+    # get the movie title from the POST parameter
+    movie_title = body['movie_title']
+
+    # find the integration with the access token
+    integration = Integration.objects.get(access_token=access_token)
+
+    # get the user's profile
+    profile = integration.profile
+
+    # search for the movie
+    with open('secrets.json') as f:
+        secrets = json.load(f)
+        tmdb.API_KEY = secrets['tmdb_api_key']
+    search = tmdb.Search()
+    response = search.movie(query=movie_title)
+    if(len(search.results) == 0):
+        return HttpResponse(json.dumps({'success': False}), content_type="application/json")
+    # get the movie id
+    movie_id = search.results[0]['id']
+
+    # check if the movie exists in the database
+    if not Movie.objects.filter(tmdb_id=movie_id).exists():
+        with open('secrets.json') as f:
+            secrets = json.load(f)
+            tmdb.API_KEY = secrets['tmdb_api_key']
+        movie = tmdb.Movies(movie_id).info()
+
+        poster_url = 'https://image.tmdb.org/t/p/w500' + movie['poster_path']
+        
+        m = Movie(tmdb_id=movie_id, title=movie['title'], description=movie['overview'], movie_poster_url=poster_url)
+        m.save()
+        
+        # Correctly formatting and updating the generes
+        for genre in m.genres.all():
+            formatted_genre = format_genre_name(genre.name)
+            profile.update_genres_watched(formatted_genre)
+        
+        # Save genres
+        for genre in movie['genres']:
+            genre_obj, _ = Genre.objects.get_or_create(name=genre['name'])
+            m.genres.add(genre_obj)
+
+        m.save()
+    
+    else:
+        # get the movie
+        m = Movie.objects.get(tmdb_id=movie_id)
+    
+    # add the movie to the user's watchlist
+
+    # make sure the watched item doesn't already exist
+    if WatchedItem.objects.filter(profile=profile, movie=m).exists():
+        return HttpResponse(json.dumps({'success': "false", "ErrorMessage": "Already Watched"}), content_type='application/json')
+    
+    
+    date = datetime.date.today()
+
+    watched_item = WatchedItem(profile=profile, movie=m, date_watched=date)
+    watched_item.save()
+
+    # Update the number of movies watched
+    profile.movies_watched += 1
+
+    # Update genre count for each genre in the movie
+    for genre in m.genres.all():
+        profile.update_genres_watched(genre.name)
+    
+
+    profile.save()
+
+    return HttpResponse(json.dumps({'success': "true"}), content_type='application/json')
 
 def randomrec(request):
     with open('secrets.json') as f:
@@ -221,13 +333,15 @@ def profile(request, username):
     if request.user.is_authenticated and request.user.username == username:
         # Get the data correlating to the user
         user_profile = UserProfile.objects.get(user=request.user)
+        integrations = Integration.objects.filter(profile=user_profile)
+        print(integrations)
         # Updates the user's badges
         user_profile.check_badges()
         # Refreshes the user's profile to reflect any changes
         user_profile.refresh_from_db() 
 
         # Setting the user_profile's data to the profile variable to be used in a template
-        context = {'profile': user_profile}
+        context = {'profile': user_profile, 'integrations': integrations}
         # Renders the profile template with the user's profile data and returns it as an HTTP response
         return render(request, 'profile/profile.html', context)
     else:
