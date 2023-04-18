@@ -293,21 +293,46 @@ def api_search_and_add(request):
     return HttpResponse(json.dumps({'success': "true"}), content_type='application/json')
 
 def randomrec(request):
+
+    adultFlag = True 
+
     with open('secrets.json') as f:
         secrets = json.load(f)
         tmdb.API_KEY = secrets['tmdb_api_key']
-    latestMovie = tmdb.Movies().latest()
-    movieId     = latestMovie['id']
 
-    randomNum   = random.randint(1, movieId)
-    randomMovie = tmdb.Movies(randomNum)
+    latestMovieId = tmdb.Movies().latest()['id']
 
-    response         = randomMovie.info()
-    randomMovieTitle = randomMovie.title
+    while adultFlag == True:
+        randomNum = random.randint(1, latestMovieId)
 
-    context = {'randomMovieTitle': randomMovieTitle}
+        while True:
+            try:
+                response = requests.get('https://api.themoviedb.org/3/movie/' + str(randomNum) + '?api_key=' + tmdb.API_KEY)
+                response.raise_for_status()
+                break
+            except requests.exceptions.HTTPError as error:
+                randomNum = random.randint(1, latestMovieId)
+                continue
 
-    return render(request, 'home/randomrec.html', context) 
+        movie   = tmdb.Movies(randomNum)
+        movInfo = movie.info()
+
+        if movInfo['adult'] == False:
+            adultFlag = False
+
+    movTitle = movInfo['title']
+    poster   = movie.images()['posters']
+
+    if len(poster) != 0:
+        partPostUrl = poster[0]['file_path']
+        fullPostUrl = 'https://image.tmdb.org/t/p/original' + partPostUrl
+    else:
+        fullPostUrl = 'https://www.smileysapp.com/emojis/wailing-emoji.png'
+
+    return render(request, 'home/randomrec.html', {'movieTitle': movTitle, 'moviePoster': fullPostUrl}) 
+
+def theaters(request):
+    return render(request, 'home/theaters.html')
 
 @login_required
 # Handles the home page view
