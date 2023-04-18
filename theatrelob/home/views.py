@@ -476,7 +476,10 @@ def recommend_movie_view(request):
         credits_file = pd.read_csv(csvcredits_path)
         recommender = MovieRecommender(credits_file, movies_file)
         recommended_movies = recommender.recommend(user_movielist)
-        display_movie = {"recommended_movies": recommended_movies}
+        recommended_movies_plots = recommender.plotrec(user_movielist)
+        if recommended_movies is None:
+            return render(request, "recs/movieNotFound.html")
+        display_movie = {"recommended_movies": recommended_movies, "recommended_movies_plots": recommended_movies_plots}
         return render(request, "recs/recommendList.html", display_movie)
     else:
         return render(request, "recs/addMovies.html")

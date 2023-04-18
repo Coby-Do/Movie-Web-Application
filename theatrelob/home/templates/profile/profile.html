@@ -45,4 +45,20 @@
             <a href="{% url 'index' %}" class="btn btn-primary">Return to Home</a>
         </button>
     </ul>
+
+    <button>
+        <a href="{% url 'recommendList' %}">View Recommended List</a>
+    </button>
+
+    <button>
+        <a href="{% url 'addedMovie' %}"> Add a Movie</a>
+    </button>
+
+    {% if user.is_authenticated %}
+    <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit">Logout</button>
+    </form>
+    {% endif %}
+
 {% endblock %}

@@ -1,10 +1,23 @@
 <!DOCTYPE html>
 {% block content %}
     <h2>Movie Recommendation</h2>
-    <form method="post" action="{% url 'recommendList' %}">
-        {% csrf_token %}
-        <label for="user_movielist">Enter your movie list (comma separated):</label>
-        <input type="text" id="user_movielist" name="user_movielist" required>
-        <button type="submit">Get Recommendations</button>
-    </form>
+
+      {% if user.is_authenticated %}
+        <form method="post" action="{% url 'recommendList' %}">
+            {% csrf_token %}
+            <label for="user_movielist">Enter your movie list (comma separated):</label>
+            <input type="text" id="user_movielist" name="user_movielist" required>
+            <button type="submit">Get Recommendations</button>
+        </form>
+      {% else %}
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'login' %}">Login</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'register' %}">Register</a>
+          </li>
+        </ul>
+      {% endif %}
+
 {% endblock %}
