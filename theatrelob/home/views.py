@@ -5,16 +5,11 @@ from django.template import loader
 import json
 import random
 import tmdbsimple as tmdb
-from .models import Integration, Movie, WatchedItem
+from .models import Integration, Movie, WatchedItem, Genre
 from django.contrib.auth.decorators import login_required
-
-# For recommend
 import pandas as pd
 import os
 from django.conf import settings
-
-#
-from django.shortcuts import render, get_object_or_404
 from .models import UserProfile, MovieRecommender
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
@@ -24,7 +19,6 @@ from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.views import LoginView
-
 
 
 def index(request):
@@ -59,8 +53,28 @@ def watchlist(request):
     # get the user's watched items
     watched_items = WatchedItem.objects.filter(profile=profile)
 
+    # Display movies with genres
+    movies_with_genres = []
+    for watched_item in watched_items:
+        movie = watched_item.movie
+        genres_list = []
+        for genre in movie.genres.all():
+            genres_list.append(genre.name)
+        genres = ', '.join(genres_list)
+
+        movies_with_genres.append((movie, genres))
+
     # display the watched items
     return render(request, 'home/watchlist.html', {'watched_items': watched_items})
+
+# Properply formatting the genre's name
+def format_genre_name(genre):
+        if genre.lower() == "tv movie":
+            return "TV Movie"
+        elif genre.lower() == "science fiction":
+            return "Science Fiction"
+        else:
+            return genre.title()
 
 @login_required(login_url='accounts/login/')
 def add_to_watchlist(request):
@@ -78,26 +92,51 @@ def add_to_watchlist(request):
 
     if movie_id is not None:
         # check if the movie exists in the database
-        if not Movie.objects.filter(id=movie_id).exists():
+        if not Movie.objects.filter(tmdb_id=movie_id).exists():
             with open('secrets.json') as f:
                 secrets = json.load(f)
                 tmdb.API_KEY = secrets['tmdb_api_key']
             movie = tmdb.Movies(movie_id).info()
+
             poster_url = 'https://image.tmdb.org/t/p/w500' + movie['poster_path']
-            m = Movie(id=movie_id, title=movie['title'], description=movie['overview'], movie_poster_url=poster_url, tmdb_id=movie_id)
+            
+            m = Movie(tmdb_id=movie_id, title=movie['title'], description=movie['overview'], movie_poster_url=poster_url)
+            m.save()
+            
+            # Correctly formatting and updating the generes
+            for genre in m.genres.all():
+                formatted_genre = format_genre_name(genre.name)
+                profile.update_genres_watched(formatted_genre)
+            
+            # Save genres
+            for genre in movie['genres']:
+                genre_obj, _ = Genre.objects.get_or_create(name=genre['name'])
+                m.genres.add(genre_obj)
+
             m.save()
 
-        # get the movie
-        movie = Movie.objects.get(id=movie_id)
+        else:
+            # get the movie
+            m = Movie.objects.get(tmdb_id=movie_id)
 
         # add the movie to the user's watchlist
         date = datetime.date.today()
 
-        watched_item = WatchedItem(profile=profile, movie=movie, date_watched=date)
+        watched_item = WatchedItem(profile=profile, movie=m, date_watched=date)
         watched_item.save()
+
+        # Update the number of movies watched
+        profile.movies_watched += 1
+
+        # Update genre count for each genre in the movie
+        for genre in m.genres.all():
+            profile.update_genres_watched(genre.name)
+
+        profile.save()
 
         # redirect to the watchlist page
         return redirect('watchlist')
+
 
 @login_required(login_url='accounts/login/')
 def get_access_token(request):
@@ -117,8 +156,8 @@ def get_access_token(request):
 
 def randomrec(request):
     with open('secrets.json') as f:
-         secrets = json.load(f)
-         tmdb.API_KEY = secrets['tmdb_api_key']
+        secrets = json.load(f)
+        tmdb.API_KEY = secrets['tmdb_api_key']
     latestMovie = tmdb.Movies().latest()
     movieId     = latestMovie['id']
 
@@ -132,207 +171,301 @@ def randomrec(request):
 
     return render(request, 'home/randomrec.html', context) 
 
-# Profile views
-
 @login_required
-
+# Handles the home page view
 def home(request):
+    # Renders the homepage template and returns it as an HTTP response
     return render(request, 'profiles/home.html')
 
+# This is to render the login page
 class CustomLoginView(LoginView):
-    template_name = 'home/login.html'
+    login_page = 'home/login.html'
 
+# Handles the logout view
 def logout_view(request):
+    # Calls Django's logout function and logs the user out
     logout(request)
+    # Redirects the user back to the main page
     return redirect('index')
 
+# Handles the registration view
 def register(request):
+    # Checks if the request method is form submission
     if request.method == 'POST':
+        # Initializes a UserCreationForm with the given data
         form = UserCreationForm(request.POST)
+        # Validates the form
         if form.is_valid():
+            # Saves the form
             user = form.save()
             # Check if a UserProfile already exists for the user
             if not UserProfile.objects.filter(user=user).exists():
-                UserProfile.objects.create(user=user)  # Create a UserProfile for the new user
+                # Creates the user's profile for the new user
+                UserProfile.objects.create(user=user)
+            # Logs the user in
             login(request, user)
+            # Redirects the user to the homepage
             return redirect('index')
     else:
+        # Initializes an empty UserCreationForm if there's no request method
         form = UserCreationForm()
-    return render(request, 'profile/register.html', {'form': form})
+    
+    # Setting the form's data to the form variable to be used in a template
+    context = {'form' : form}
+    # Renders the registratoin template with the form data and returns it as an HTTP response
+    return render(request, 'profile/register.html', context)
 
+# Handldes the user's profile view
 def profile(request, username):
+    # Validates the user and checks if the requested username matches the logged in username
     if request.user.is_authenticated and request.user.username == username:
+        # Get the data correlating to the user
         user_profile = UserProfile.objects.get(user=request.user)
+        # Updates the user's badges
         user_profile.check_badges()
-        user_profile.refresh_from_db()  # Refresh the user_profile instance from the database
-        # return render(request, 'profiles/profile.html', {'profile': user_profile})
-        return render(request, 'profile/profile.html', {'profile': user_profile})
+        # Refreshes the user's profile to reflect any changes
+        user_profile.refresh_from_db() 
+
+        # Setting the user_profile's data to the profile variable to be used in a template
+        context = {'profile': user_profile}
+        # Renders the profile template with the user's profile data and returns it as an HTTP response
+        return render(request, 'profile/profile.html', context)
     else:
+        # Redirect the user back to the homepage if the user isn't validated
         return HttpResponseRedirect(reverse('index'))
 
+# Handles the list of badges views
 def badge_list(request):
+    # Validates the user
     if request.user.is_authenticated:
+        # Get the badge objects
         badges = Badge.objects.all()
+        # Get the user's profile data
         profile = UserProfile.objects.get(user=request.user)
-        return render(request, 'profile/badge_list.html', {'badges': badges, 'profile': profile})
+
+        # Setting the badge's and profile's data to the badges and profile variables to be used in a template
+        context = {'badges': badges, 'profile': profile}
+        # Renders the badge list template with the user's profile and badge data and returns it as an HTTP response
+        return render(request, 'profile/badge_list.html', context)
     else:
+        # Redirect the user back to the homepage if the user isn't validated
         return HttpResponseRedirect(reverse('index'))
 
+# Creates the badges
 def create_badges(request):
+    # Defines the badge data as a list of dictionaries containing each badge info
     badges_data = [
         {
             'name': '10 Movies Watched',
-            'description': 'Watched 10 movies.',
+            'description': 'Watch 10 movies.',
             'type': 'movies_watched',
             'requirement': 10
         },
         {
             'name': '20 Movies Watched',
-            'description': 'Watched 20 movies.',
+            'description': 'Watch 20 movies.',
             'type': 'movies_watched',
             'requirement': 20
         },
         {
             'name': 'Genre Enthusiast',
-            'description': 'Watched movies from 5 different genres.',
+            'description': 'Watch movies from 5 different genres.',
             'type': 'genres_watched',
             'requirement': 5
         },
         {
-            'name': 'Animation Fan',
-            'description': 'Watched 5 animated movies.',
-            'type': 'animated_movies_watched',
+            'name': "Dom Toretto's Family",
+            'description': 'Watch 5 Action Movies.',
+            'type': 'genre',
+            'genre': 'Action',
             'requirement': 5
         },
         {
-            'name': 'Documentary Buff',
-            'description': 'Watched 3 documentaries.',
-            'type': 'documentaries_watched',
-            'requirement': 3
-        },
-        {
-            'name': 'Action Lover',
-            'description': 'Watched 5 action movies.',
-            'type': 'action_movies_watched',
+            'name': "Indiana Jone's Party",
+            'description': 'Watch 5 Adventure Movies.',
+            'type': 'genre',
+            'genre': 'Adventure',
             'requirement': 5
         },
         {
-            'name': 'Comedy Fan',
-            'description': 'Watched 5 comedy movies.',
-            'type': 'comedy_movies_watched',
+            'name': "Micky's Clubhouse",
+            'description': 'Watch 5 Animation Movies.',
+            'type': 'genre',
+            'genre': 'Animation',
             'requirement': 5
         },
         {
-            'name': 'Romance Enthusiast',
-            'description': 'Watched 5 romance movies.',
-            'type': 'romance_movies_watched',
+            'name': "McLovin's BFF",
+            'description': 'Watch 5 Comedy Movies.',
+            'type': 'genre',
+            'genre': 'Comedy',
             'requirement': 5
         },
-
-        # Add more badges here as needed
+        {
+            'name': "John Wick's Hitlist",
+            'description': 'Watch 5 Crime Movies.',
+            'type': 'genre',
+            'genre': 'Crime',
+            'requirement': 5
+        },
+        {
+            'name': "Tiger King's Lil Kitten",
+            'description': 'Watch 5 Documentary Movies.',
+            'type': 'genre',
+            'genre': 'Documentary',
+            'requirement': 5
+        },
+        {
+            'name': "Rocky's Opponent",
+            'description': 'Watch 5 Drama Movies.',
+            'type': 'genre',
+            'genre': 'Drama',
+            'requirement': 5
+        },
+        {
+            'name': "Shrek Is love Shrek Is Life",
+            'description': 'Watch 5 Family Movies.',
+            'type': 'genre',
+            'genre': 'Family',
+            'requirement': 5
+        },
+        {
+            'name': "Lord Voldemort's Follower",
+            'description': 'Watch 5 Fantasy Movies.',
+            'type': 'genre',
+            'genre': 'Fantasy',
+            'requirement': 5
+        },
+        {
+            'name': "Apollo 13's Hidden Crew Member",
+            'description': 'Watch 5 History Movies.',
+            'type': 'genre',
+            'genre': 'History',
+            'requirement': 5
+        },
+        {
+            'name': "Michael Myer's Next Target",
+            'description': 'Watch 5 Horror Movies.',
+            'type': 'genre',
+            'genre': 'Horror',
+            'requirement': 5
+        },
+        {
+            'name': "Dorothy's Friend",
+            'description': 'Watch 5 Music Movies.',
+            'type': 'genre',
+            'genre': 'Music',
+            'requirement': 5
+        },
+        {
+            'name': "???",
+            'description': 'Watch 5 Mystery Movies.',
+            'type': 'genre',
+            'genre': 'Mystery',
+            'requirement': 5
+        },
+        {
+            'name': 'Fifty Shades of Software Sweethearts',
+            'description': 'Watch 5 Romance Movies.',
+            'type': 'genre',
+            'genre': 'Romance',
+            'requirement': 5
+        },
+        {
+            'name': "Blade Runner's Cyberpunk Circle",
+            'description': 'Watch 5 Science Fiction Movies.',
+            'type': 'genre',
+            'genre': 'Science Fiction',
+            'requirement': 5
+        },
+        {
+            'name': "Parsite's Cunning Crew",
+            'description': 'Watch 5 Thriller Movies.',
+            'type': 'genre',
+            'genre': 'Thriller',
+            'requirement': 5
+        },
+        {
+            'name': 'Couch Potato',
+            'description': 'Watch 5 TV Movie Movies.',
+            'type': 'genre',
+            'genre': 'TV Movie',
+            'requirement': 5
+        },
+        {
+            'name': 'American Snipers Enemy',
+            'description': 'Watch 5 War Movies.',
+            'type': 'genre',
+            'genre': 'War',
+            'requirement': 5
+        },
+        {
+            'name': 'The Elite Gunslinger',
+            'description': 'Watch 5 Western Movies.',
+            'type': 'genre',
+            'genre': 'Western',
+            'requirement': 5
+        },
     ]
 
+    # Iterating through the badge data
     for badge_data in badges_data:
+        # Creates the badge object or get it if it already exists
         Badge.objects.get_or_create(
+            # Obtaining the name, description, type, genre, and requirement criteras
             name=badge_data['name'],
             description=badge_data['description'],
             badge_type=badge_data.get('type'),
+            genre=badge_data.get('genre', ''),
             requirement=badge_data.get('requirement', 0),
         )
 
+    # Send a reponse to indicate that the badges have been created 
     return HttpResponse("Badges created!")
 
-def watch_movie(request):
-    user_profile = UserProfile.objects.get(user=request.user)
-    user_profile.movies_watched += 1
-    user_profile.save()
-    newly_earned_badges = user_profile.check_badges()
-
-    for badge in newly_earned_badges:
-        messages.success(request, f'Congratulations! You earned the "{badge.name}" badge!')
-
-    username = request.user.username
-    return redirect('profile', username=username)
-
+# Resets the user's badge data
 def reset_user_badges(request):
+    # Validates the user
     if request.user.is_authenticated:
+        # Get the user's profile data
         user_profile = UserProfile.objects.get(user=request.user)
+
+        # Clearing the user's badge data
         user_profile.badges.clear()
         user_profile.movies_watched = 0
-        user_profile.animated_movies_watched = 0
-        user_profile.documentaries_watched = 0
         user_profile.action_movies_watched = 0
+        user_profile.adventure_movies_watched = 0
+        user_profile.animation_movies_watched = 0
         user_profile.comedy_movies_watched = 0
+        user_profile.crime_movies_watched = 0
+        user_profile.documentary_movies_watched = 0
+        user_profile.drama_movies_watched = 0
+        user_profile.family_movies_watched = 0
+        user_profile.fantasy_movies_watched = 0
+        user_profile.history_movies_watched = 0
+        user_profile.horror_movies_watched = 0
+        user_profile.music_movies_watched = 0
+        user_profile.mystery_movies_watched = 0
         user_profile.romance_movies_watched = 0
+        user_profile.science_fiction_movies_watched = 0
+        user_profile.thriller_movies_watched = 0
+        user_profile.tv_movie_movies_watched = 0
+        user_profile.war_movies_watched = 0
+        user_profile.western_movies_watched = 0
         user_profile.save()
-        print("User badges cleared for user:", request.user.username)
+
+        # Redirects the user back to the profile page with the specified username
         return HttpResponseRedirect(reverse('profile', args=[request.user.username]))
     else:
+        # Redirects the user back to the homepage
         return HttpResponseRedirect(reverse('index'))
 
+# Deletes the badges
 def delete_badges(request):
+    # Deletes all the badge objects from the database
     Badge.objects.all().delete()
+    # Send a reponse to indicate that the badges have been deleted 
     return HttpResponse("Badges deleted!")
-
-def watch_animation(request):
-    if request.user.is_authenticated:
-        user_profile = UserProfile.objects.get(user=request.user)
-        user_profile.animated_movies_watched += 1
-        user_profile.movies_watched += 1
-        user_profile.save()
-        user_profile.check_badges()
-        user_profile.refresh_from_db()
-        return redirect('profile', request.user.username)
-    else:
-        return HttpResponseRedirect(reverse('index'))
-
-def watch_documentary(request):
-    if request.user.is_authenticated:
-        user_profile = UserProfile.objects.get(user=request.user)
-        user_profile.documentaries_watched += 1
-        user_profile.movies_watched += 1
-        user_profile.save()
-        user_profile.check_badges()
-        user_profile.refresh_from_db()
-        return redirect('profile', request.user.username)
-    else:
-        return HttpResponseRedirect(reverse('index'))
-
-def watch_action(request):
-    if request.user.is_authenticated:
-        user_profile = UserProfile.objects.get(user=request.user)
-        user_profile.action_movies_watched += 1
-        user_profile.movies_watched += 1
-        user_profile.save()
-        user_profile.check_badges()
-        user_profile.refresh_from_db()
-        return redirect('profile', request.user.username)
-    else:
-        return HttpResponseRedirect(reverse('index'))
-
-def watch_romance(request):
-    if request.user.is_authenticated:
-        user_profile = UserProfile.objects.get(user=request.user)
-        user_profile.romance_movies_watched += 1
-        user_profile.movies_watched += 1
-        user_profile.save()
-        user_profile.check_badges()
-        user_profile.refresh_from_db()
-        return redirect('profile', request.user.username)
-    else:
-        return HttpResponseRedirect(reverse('index'))
-
-def watch_comedy(request):
-    if request.user.is_authenticated:
-        user_profile = UserProfile.objects.get(user=request.user)
-        user_profile.comedy_movies_watched += 1
-        user_profile.movies_watched += 1
-        user_profile.save()
-        user_profile.check_badges()
-        user_profile.refresh_from_db()
-        return redirect('profile', request.user.username)
-    else:
-        return HttpResponseRedirect(reverse('index'))
 
 def recommend_movie_view(request):
     if request.method == "POST":
@@ -375,28 +508,57 @@ def movie_search_add(request):
             movie_id = search.results[0]['id']
 
             # check if the movie exists in the database
-            if not Movie.objects.filter(id=movie_id).exists():
+            if not Movie.objects.filter(tmdb_id=movie_id).exists():
                 # Gets the movie info using the movie id
                 movie = tmdb.Movies(movie_id).info()
 
                 # Gets the poster url
                 poster_url = 'https://image.tmdb.org/t/p/w500' + movie['poster_path']
-                m = Movie(id=movie_id, title=movie['title'], description=movie['overview'], movie_poster_url=poster_url, tmdb_id=movie_id)
+                m = Movie(tmdb_id=movie_id, title=movie['title'], description=movie['overview'], movie_poster_url=poster_url)
+
+                m.save()
+                
+                # Save every genre from tmdb database
+                genres_list = []
+                for genre in movie['genres']:
+                    genre_obj, _ = Genre.objects.get_or_create(name=genre['name'])
+                    genres_list.append(genre_obj)
+
+                # Add genres to the movie
+                m.genres.set(genres_list)
+
+                # Save the movie with genres
                 m.save()
 
-            # get the movie
-            movie = Movie.objects.get(id=movie_id)
+            else:
+                # get the movie
+                m = Movie.objects.get(tmdb_id=movie_id)
 
             # add the movie to the user's watchlist
             date = datetime.date.today()
 
-            watched_item = WatchedItem(profile=profile, movie=movie, date_watched=date)
+            watched_item = WatchedItem(profile=profile, movie=m, date_watched=date)
             watched_item.save()
+
+            # Correctly formatting the genre names and updates the count for each genre
+            for genre in m.genres.all():
+                formatted_genre = format_genre_name(genre.name)
+                profile.update_genres_watched(formatted_genre)
+
+            # Updates the number of movies watched
+            profile.movies_watched += 1
+            profile.save()
 
             # redirect to the success page
             return render(request, "profile/addedMovie.html")
     else:
         return render(request, "profile/searchAdd.html")
+
+
+
+
+
+
 
 
 
