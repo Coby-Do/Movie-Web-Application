@@ -98,15 +98,15 @@ def add_to_watchlist(request):
                 tmdb.API_KEY = secrets['tmdb_api_key']
             movie = tmdb.Movies(movie_id).info()
 
+            m = Movie(tmdb_id=movie_id, title=movie['title'], description=movie['overview'], movie_poster_url=poster_url)
+            m.save()
+            
             # Correctly formatting and updating the generes
             for genre in m.genres.all():
                 formatted_genre = format_genre_name(genre.name)
                 profile.update_genres_watched(formatted_genre)
             
             poster_url = 'https://image.tmdb.org/t/p/w500' + movie['poster_path']
-
-            m = Movie(tmdb_id=movie_id, title=movie['title'], description=movie['overview'], movie_poster_url=poster_url)
-            m.save()
 
             # Save genres
             for genre in movie['genres']:
