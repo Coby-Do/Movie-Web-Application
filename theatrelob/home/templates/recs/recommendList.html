@@ -1,5 +1,6 @@
 {% block content %}
     <h2>Recommended Movies</h2>
+    <p> Recommended Movies By Metadata </p>
     <ul>
         {% for movie in recommended_movies %}
             <li>{{ movie.title }}</li>
@@ -7,5 +8,18 @@
             <li>No movies found.</li>
         {% endfor %}
     </ul>
+    <p> Recommended Movies By Content (Plot) </p>
+    <ul>
+        {% for movie in recommended_movies_plots %}
+            <li>{{ movie.title }}</li>
+        {% empty %}
+            <li>No movies found.</li>
+        {% endfor %}
+        </ul>
+    <button>
     <a href="{% url 'recommendList' %}">Get more recommendations</a>
+    </button>
+    <button>
+    <a href="{% url 'profile' username=request.user.username%}">Return to Profile.</a>
+    </button>
 {% endblock %}

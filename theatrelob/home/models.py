@@ -5,11 +5,11 @@ from django.dispatch import receiver
 
 # Imports for recommendation system
 import numpy as np
-import tmdbsimple as tmdb
 import pandas as pd
 from ast import literal_eval
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity, linear_kernel
+
 
 # Create your models here.
 
@@ -127,6 +127,10 @@ class MovieRecommender:
     # Takes two csvfiles and a single movie. Will take a list of movies in the future.
 
     def recommend(self, movieslist):
+
+        if not (self.moviefile['title'].eq(movieslist).any()):
+            return None
+
         self.creditsfile.columns = ['id', 'title', 'cast', 'crew']  # takes only id, title, cast, and crew columns
 
         self.moviefile = self.moviefile.merge(self.creditsfile, on="title")  # merges the dataframes using the id
@@ -196,6 +200,30 @@ class MovieRecommender:
     def prepvectorizer(self, features):
         return ' '.join(features['keywords']) + ' ' + ' '.join(features['cast']) + ' ' + features[
             'director'] + ' ' + ' '.join(features['genres'])
+
+    def plotrec(self, movieslist):
+
+        if not (self.moviefile['title'].eq(movieslist).any()):
+            return None
+
+        tfidf = TfidfVectorizer(stop_words="english") # Creates a Tf-Idf vectorizer with the english stop words
+        self.moviefile["overview"] = self.moviefile["overview"].fillna("")
+
+        tfidf_matrix = tfidf.fit_transform(self.moviefile["overview"])
+        cosine_sim = linear_kernel(tfidf_matrix, tfidf_matrix)
+
+        indices = pd.Series(self.moviefile.index, index=self.moviefile["title"]).drop_duplicates()
+        idx = indices[movieslist]
+        simscore = list(enumerate(cosine_sim[idx]))
+        simscore = sorted(simscore, key=lambda x: x[1], reverse=True)
+        simscore = simscore[1:11]
+
+        moviesindices = [ind[0] for ind in simscore]
+        movies = self.moviefile["title"].iloc[moviesindices]
+        return movies
+
+
+
 
 
 # class Profile(models.Model):
