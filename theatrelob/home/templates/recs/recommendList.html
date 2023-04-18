@@ -18,9 +18,11 @@
         {% endfor %}
         </ul>
     <button>
-    <a href="{% url 'recommendList' %}">Get more recommendations</a>
+    <a href="{% url 'recommendList' %}">
+        Get more recommendations</a>
     </button>
     <button>
-    <a href="{% url 'profile' username=request.user.username%}">Return to Profile.</a>
+    <a href="{% url 'profile' username=request.user.username%}">
+        Return to Profile.</a>
     </button>
 {% endblock %}

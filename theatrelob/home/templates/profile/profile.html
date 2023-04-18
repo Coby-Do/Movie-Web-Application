@@ -31,9 +31,6 @@
         <button>
             <a href="{% url 'addedMovie' %}">Add a Movie</a>
         </button>
-        <button>
-            <a href="{% url 'watchlist' %}">View Watched List</a>
-        </button>
     
         <button>
             <a href="{% url 'recommendList' %}">View Recommended List</a>
@@ -46,14 +43,15 @@
         </button>
     </ul>
 
-    <button>
-        <a href="{% url 'recommendList' %}">View Recommended List</a>
-    </button>
-
-    <button>
-        <a href="{% url 'addedMovie' %}"> Add a Movie</a>
-    </button>
-
+    <ul>
+        <h3> Watchlist </h3>
+        <button>
+        <a href="{% url 'addedMovie' %}"> Add a Movie to The Watchlist</a>
+        </button>
+        <button>
+            <a href="{% url 'watchlist' %}">View Watched List</a>
+        </button>
+    </ul>
     {% if user.is_authenticated %}
     <form method="post" action="{% url 'logout' %}">
         {% csrf_token %}

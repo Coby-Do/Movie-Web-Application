@@ -479,10 +479,13 @@ def recommend_movie_view(request):
         recommended_movies_plots = recommender.plotrec(user_movielist)
         if recommended_movies is None:
             return render(request, "recs/movieNotFound.html")
-        display_movie = {"recommended_movies": recommended_movies, "recommended_movies_plots": recommended_movies_plots}
+        display_movie = {"recommended_movies": recommended_movies,
+                         "recommended_movies_plots": recommended_movies_plots}
         return render(request, "recs/recommendList.html", display_movie)
     else:
         return render(request, "recs/addMovies.html")
+
+
 
 # For searching and adding movies to the movie list
 def movie_search_add(request):
