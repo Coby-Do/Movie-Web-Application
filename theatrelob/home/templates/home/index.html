@@ -17,23 +17,26 @@
         <span class="navbar-toggler-icon"></span>
       </button>
 
-      <!-- Login, Register, and Logout buttons-->
-      {% if user.is_authenticated %}
-        <form method="post" action="{% url 'logout' %}">
-          {% csrf_token %}
-          <button type="submit">Logout</button>
-        </form>
-      {% else %}
-        <ul class="navbar-nav ml-auto">
+      <!-- Random Movie, Login, Register, and Logout buttons-->
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'randomrec' %}">Random Movie</a>
+        </li>
+
+        {% if user.is_authenticated %}
+          <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit">Logout</button>
+          </form>
+        {% else %}
           <li class="nav-item">
             <a class="nav-link" href="{% url 'login' %}">Login</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="{% url 'register' %}">Register</a>
           </li>
-        </ul>
-      {% endif %}
-
+        {% endif %}
+      </ul>
 
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav">
@@ -44,6 +47,13 @@
   </head>
   
   <body>
+    <!-- Redirect Function to display nearby theaters -->
+    <script>
+      function theaterRedirect(movieTitle){
+        window.location.href = "/theaters?search=" + movieTitle;
+      }
+    </script>
+
     <!-- Display A Card Holding Movie Information-->
 
     <div
@@ -74,6 +84,8 @@
             
                 <input type="submit" value="Add To Watchlist">
                 </form>
+              <!-- Button to Display Nearby Theaters Showing This Movie -->
+              <button onclick="theaterRedirect('{{ movies.0.0.title }}')">Theaters Near Me</button>
             </div>
             <div class="col-lg-4">
               <img
@@ -93,6 +105,8 @@
             
                 <input type="submit" value="Add To Watchlist">
                 </form>
+              <!-- Button to Display Nearby Theaters Showing This Movie -->
+              <button onclick="theaterRedirect('{{ movies.0.1.title }}')">Theaters Near Me</button>
             </div>
             <div class="col-lg-4">
               <img
@@ -115,6 +129,8 @@
                 {% else %}
                   <button onclick="window.location.href='{% url 'login' %}?next={{ request.path }}'">Add to Watchlist</button>
                 {% endif %}
+              <!-- Button to Display Nearby Theaters Showing This Movie -->
+              <button onclick="theaterRedirect('{{ movies.0.2.title }}')">Theaters Near Me</button>
             </div>
           </div>
         </div>
@@ -142,6 +158,8 @@
             
                 <input type="submit" value="Add To Watchlist">
                 </form>
+              <!-- Button to Display Nearby Theaters Showing This Movie -->
+              <button onclick="theaterRedirect('{{ movie.title }}')">Theaters Near Me</button>
             </div>
             {% endfor %}
           </div>
