@@ -38,8 +38,6 @@
                 const urlParams = new URLSearchParams(queryString);
                 const movieTitle = urlParams.get('search');
 
-                console.log(movieTitle);
-
                 var movieShowing = "movie theaters showing " + movieTitle;
 
                 navigator.geolocation.getCurrentPosition(function(position){
@@ -75,6 +73,7 @@
                             }
                         }
                     })
+                })
             }
         </script>
     </body>
