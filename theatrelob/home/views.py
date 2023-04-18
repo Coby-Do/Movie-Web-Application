@@ -477,14 +477,78 @@ def recommend_movie_view(request):
         recommender = MovieRecommender(credits_file, movies_file)
         recommended_movies = recommender.recommend(user_movielist)
         recommended_movies_plots = recommender.plotrec(user_movielist)
+        rec_movies = []
+        rec_movies_plots = []
+        search = tmdb.Search()
         if recommended_movies is None:
             return render(request, "recs/movieNotFound.html")
-        display_movie = {"recommended_movies": recommended_movies,
-                         "recommended_movies_plots": recommended_movies_plots}
+        for title in recommended_movies:
+            with open('secrets.json') as f:
+                secrets = json.load(f)
+                tmdb.API_KEY = secrets['tmdb_api_key']
+
+            # Searches for movie and gets the id of the top result
+            response = search.movie(query=title)
+
+            movie_id = search.results[0]['id']
+            # check if the movie exists in the database
+            if not Movie.objects.filter(tmdb_id=movie_id).exists():
+                # Gets the movie info using the movie id
+                movie = tmdb.Movies(movie_id).info()
+
+                # Gets the poster url
+                poster_url = 'https://image.tmdb.org/t/p/w500' + movie['poster_path']
+                m = Movie(tmdb_id=movie_id, title=movie['title'], description=movie['overview'],
+                          movie_poster_url=poster_url)
+
+                m.save()
+            else:
+                # get the movie
+                m = Movie.objects.get(tmdb_id=movie_id)
+                rec_movies.append(m)
+
+        for title in recommended_movies_plots:
+            with open('secrets.json') as f:
+                secrets = json.load(f)
+                tmdb.API_KEY = secrets['tmdb_api_key']
+
+            # Searches for movie and gets the id of the top result
+            response = search.movie(query=title)
+
+            movie_id = search.results[0]['id']
+            # check if the movie exists in the database
+            if not Movie.objects.filter(tmdb_id=movie_id).exists():
+                # Gets the movie info using the movie id
+                movie = tmdb.Movies(movie_id).info()
+
+                # Gets the poster url
+                poster_url = 'https://image.tmdb.org/t/p/w500' + movie['poster_path']
+                m = Movie(tmdb_id=movie_id, title=movie['title'], description=movie['overview'],
+                          movie_poster_url=poster_url)
+
+                m.save()
+
+                genres_list = []
+                for genre in movie['genres']:
+                    genre_obj, _ = Genre.objects.get_or_create(name=genre['name'])
+                    genres_list.append(genre_obj)
+
+                m.genres.set(genres_list)
+
+                m.save()
+
+                for genre in m.genres.all():
+                    formatted_genre = format_genre_name(genre.name)
+            else:
+                # get the movie
+                m = Movie.objects.get(tmdb_id=movie_id)
+                rec_movies_plots.append(m)
+
+        display_movie = {"rec_movies": rec_movies,
+                         "rec_movies_plots": rec_movies_plots}
         return render(request, "recs/recommendList.html", display_movie)
     else:
         return render(request, "recs/addMovies.html")
-
 
 
 # For searching and adding movies to the movie list

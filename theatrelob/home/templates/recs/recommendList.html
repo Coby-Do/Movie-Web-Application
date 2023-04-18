@@ -1,22 +1,42 @@
 <!DOCTYPE html>
 {% block content %}
     <h2>Recommended Movies</h2>
-    <p> Recommended Movies By Metadata </p>
+    <h2> Recommended Movies By Metadata </h2>
     <ul>
-        {% for movie in recommended_movies %}
-            <li>{{ movie.title }}</li>
-        {% empty %}
-            <li>No movies found.</li>
+        {% for movie in rec_movies %}
+        <div class = "card" style="width: 18rem;">
+            <img class = "card-img-top" src = "{{movie.movie_poster_url}}" alt="Card image cap">
+            <div class="card-body">
+                <h5 class = "card-title">{{movie.title}}</h5>
+                <p class = "card-text">{{movie.description}}</p>
+                <p class = "card-text">Genres:
+                    {% for genre in movie.genres.all %}
+                        {{ genre.name }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </p>
+            </div>
+        </div>
         {% endfor %}
     </ul>
-    <p> Recommended Movies By Content (Plot) </p>
+    <h2> End of Recommendations By MetaData</h2>
+    <h2> Recommended Movies By Content (Plot)</h2>
     <ul>
-        {% for movie in recommended_movies_plots %}
-            <li>{{ movie.title }}</li>
-        {% empty %}
-            <li>No movies found.</li>
+        {% for movie in rec_movies_plots %}
+        <div class = "card" style="width: 18rem;">
+            <img class = "card-img-top" src = "{{movie.movie_poster_url}}" alt="Card image cap">
+            <div class="card-body">
+                <h5 class = "card-title">{{movie.title}}</h5>
+                <p class = "card-text">{{movie.description}}</p>
+                <p class = "card-text">Genres:
+                    {% for genre in movie.genres.all %}
+                        {{ genre.name }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </p>
+            </div>
+        </div>
         {% endfor %}
         </ul>
+    <h2> End of Recommendations by Content (Plot)</h2>
     <button>
     <a href="{% url 'recommendList' %}">
         Get more recommendations</a>
