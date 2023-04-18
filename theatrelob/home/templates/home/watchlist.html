@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="white">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -20,12 +20,14 @@
         </div>
       </nav>
   </head>
-  <body>
+  <body >
+    <h1 class="text-center">Watchlist</h1>
     <!-- list out all watched movies--> 
     <!-- make it be a grid -->
+    <div class="row">
     {% for item in watched_items %}
-    <div class="card" style="width: 18rem;">
-      <img class="card-img-top" src="{{item.movie.movie_poster_url}}" alt="Card image cap">
+    <div class="card mb-3 border-primary " style="max-width: 19rem; background-size: cover;">
+      <img class="card-img" src="{{item.movie.movie_poster_url}}" alt="Card image cap">
       <div class="card-body">
         <h5 class="card-title">{{item.movie.title}}</h5>
         <p class="card-text">{{item.movie.description}}</p>
@@ -38,10 +40,13 @@
         <form method="post" action="{% url 'remove_from_watchlist' %}">
         {% csrf_token %}
         <input type="hidden" name="movie_id" value="{{ item.movie.tmdb_id }}">
-        <input type="submit" value="Remove from Watchlist" class="btn btn-primary">
+        <div class="col text-center">
+          <input type="submit" value="Remove from Watchlist" class="btn btn-primary btn-sm">
+        </div>
 
       </div>
     </div>
     {% endfor %}
+    </div>
   </body>
 </html>
