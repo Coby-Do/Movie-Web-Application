@@ -16,13 +16,13 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav">
-  
           </ul>
         </div>
       </nav>
   </head>
   <body>
-    <!-- list out all watched movies-->
+    <!-- list out all watched movies--> 
+    <!-- make it be a grid -->
     {% for item in watched_items %}
     <div class="card" style="width: 18rem;">
       <img class="card-img-top" src="{{item.movie.movie_poster_url}}" alt="Card image cap">
@@ -34,6 +34,12 @@
             {{ genre.name }}{% if not forloop.last %}, {% endif %}
           {% endfor %}
         </p>
+        <! -- add a button to remove from watchlist -->
+        <form method="post" action="{% url 'remove_from_watchlist' %}">
+        {% csrf_token %}
+        <input type="hidden" name="movie_id" value="{{ item.movie.tmdb_id }}">
+        <input type="submit" value="Remove from Watchlist" class="btn btn-primary">
+
       </div>
     </div>
     {% endfor %}

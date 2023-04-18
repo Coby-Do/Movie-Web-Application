@@ -80,6 +80,32 @@ def format_genre_name(genre):
             return genre.title()
 
 @login_required(login_url='accounts/login/')
+def remove_from_watchlist(request):
+    # get the user's id
+    user_id = request.user.id
+
+    # get the user's profile
+    profile = UserProfile.objects.get(user_id=user_id)
+
+    # get the movie's id from the POST parameter
+    movie_id = request.POST.get('movie_id', None)
+    print("movie_id: ", movie_id)
+
+    # get the movie
+    m = Movie.objects.get(tmdb_id=movie_id)
+
+    # remove the movie from the user's watchlist
+    WatchedItem.objects.filter(profile=profile, movie=m).delete()
+
+    # Update the number of movies watched
+    profile.movies_watched -= 1
+    
+    profile.save()
+
+    # redirect to the watchlist page
+    return redirect('watchlist')
+
+@login_required(login_url='accounts/login/')
 def add_to_watchlist(request):
     if not request.user.is_authenticated:
         return redirect('login')
@@ -206,7 +232,7 @@ def api_search_and_add(request):
     # search for the movie
     with open('secrets.json') as f:
         secrets = json.load(f)
-        tmdb.API_KEY = secrets['tmdb_api_key']
+        tmdb.API_KEY = secrets['tmd b_api_key']
     search = tmdb.Search()
     response = search.movie(query=movie_title)
     if(len(search.results) == 0):
