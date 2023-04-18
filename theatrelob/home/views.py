@@ -5,6 +5,7 @@ from django.template import loader
 import json
 import random
 import tmdbsimple as tmdb
+import requests
 from .models import Integration, Movie, WatchedItem, Genre
 from django.contrib.auth.decorators import login_required
 import pandas as pd

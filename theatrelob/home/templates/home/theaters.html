@@ -4,6 +4,8 @@
         <title>Theaters Near Me</title>
 
         <script>
+            // Initial bootstrap loader as recommended by Google Maps Platform
+            // Much of the initial code in the head element are recomended settings
             (g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({
               key: "AIzaSyBeqij-KNScgFWmUslJryOY4u-yDhRem2s",
             });
@@ -13,12 +15,13 @@
             #map {
                 height: 100%;
                 width: 50%;
-            }
+            } /* Map widget styling */
+
             html, body {
               height: 100%;
               margin: 10px;
               padding: 0;
-            }
+            } /* HTML and body styling */
         </style>
 
         <script async
@@ -31,11 +34,10 @@
     <body>
         <script>
             var markers = [];
-            var searchRadius = '30000';
+            var searchRadius = '32186.88';
 
             function initMap() {
-                const queryString = window.location.search;
-                const urlParams = new URLSearchParams(queryString);
+                const urlParams = new URLSearchParams(window.location.search);
                 const movieTitle = urlParams.get('search');
 
                 var movieShowing = "movie theaters showing " + movieTitle;
@@ -44,12 +46,12 @@
                     var userLocation = {
                         lat: position.coords.latitude,
                         lng: position.coords.longitude
-                    };
+                    }; // userLocation params
 
                     var map = new google.maps.Map(document.getElementById('map'), { 
-                        zoom: 8,
-                        center: userLocation
-                    });
+                        center: userLocation,
+                        zoom: 8
+                    }); // map params
 
                     var service = new google.maps.places.PlacesService(map);
 
@@ -59,22 +61,22 @@
                                 let place = results[i];
                                 let placeLocation = place.geometry.location;
                                 let placeMarker = new google.maps.Marker({
-                                    position: placeLocation,
                                     map: map,
+                                    position: placeLocation,
                                     title: place.name
-                                });
+                                }); // placeMarker params
 
                                 placeMarker.addListener('click', function(){
-                                    map.setZoom(15);
                                     map.setCenter(placeMarker.getPosition());
-                                });
+                                    map.setZoom(15);
+                                }); // placeMarker listeners
 
                                 markers.push(placeMarker);
-                            }
-                        }
-                    })
-                })
-            }
+                            } // for
+                        } // then
+                    }) // Google Maps service 
+                }) // navigator 
+            } // Function initMap()
         </script>
     </body>
 </html>
