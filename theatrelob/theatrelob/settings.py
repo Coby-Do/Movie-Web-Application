@@ -25,7 +25,9 @@ SECRET_KEY = 'django-insecure-*tp*igt7pvxm4eyw6&8tj_72sw)pu_m)^8v)z1ms5&$tgish(+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["chrome-extension://plmbblkdanilakpddfmmdincmkbkkgnm", 'localhost', '127.0.0.1','*']
+CSRF_TRUSTED_ORIGINS = ["chrome-extension://plmbblkdanilakpddfmmdincmkbkkgnm"]
+
 
 
 # Application definition
