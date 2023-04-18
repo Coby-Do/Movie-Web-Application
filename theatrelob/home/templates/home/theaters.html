@@ -33,12 +33,10 @@
             var markers = [];
             var searchRadius = '30000';
 
-            function initMap() {
+            function initMap() { 
                 const queryString = window.location.search;
                 const urlParams = new URLSearchParams(queryString);
                 const movieTitle = urlParams.get('search');
-
-                console.log(movieTitle);
 
                 var movieShowing = "movie theaters showing " + movieTitle;
 
@@ -75,6 +73,7 @@
                             }
                         }
                     })
+                });
             }
         </script>
     </body>
