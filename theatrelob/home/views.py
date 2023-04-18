@@ -98,6 +98,8 @@ def add_to_watchlist(request):
                 tmdb.API_KEY = secrets['tmdb_api_key']
             movie = tmdb.Movies(movie_id).info()
 
+            poster_url = 'https://image.tmdb.org/t/p/w500' + movie['poster_path']
+            
             m = Movie(tmdb_id=movie_id, title=movie['title'], description=movie['overview'], movie_poster_url=poster_url)
             m.save()
             
@@ -106,8 +108,6 @@ def add_to_watchlist(request):
                 formatted_genre = format_genre_name(genre.name)
                 profile.update_genres_watched(formatted_genre)
             
-            poster_url = 'https://image.tmdb.org/t/p/w500' + movie['poster_path']
-
             # Save genres
             for genre in movie['genres']:
                 genre_obj, _ = Genre.objects.get_or_create(name=genre['name'])
@@ -513,6 +513,8 @@ def movie_search_add(request):
                 poster_url = 'https://image.tmdb.org/t/p/w500' + movie['poster_path']
                 m = Movie(tmdb_id=movie_id, title=movie['title'], description=movie['overview'], movie_poster_url=poster_url)
 
+                m.save()
+                
                 # Save every genre from tmdb database
                 genres_list = []
                 for genre in movie['genres']:
