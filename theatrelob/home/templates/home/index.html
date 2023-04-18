@@ -47,6 +47,13 @@
   </head>
   
   <body>
+    <!-- Redirect Function to display nearby theaters -->
+    <script>
+      function theaterRedirect(movieTitle){
+        window.location.href = "/theaters?search=" + movieTitle;
+      }
+    </script>
+
     <!-- Display A Card Holding Movie Information-->
 
     <div
@@ -74,9 +81,8 @@
             
                 <input type="submit" value="Add To Watchlist">
                 </form>
-              <form method="get" action="{% url 'theaters' %}">
-                <input type="submit" value="Theaters Near Me">
-              </form>
+              <!-- Button to Display Nearby Theaters Showing This Movie -->
+              <button onclick="theaterRedirect('{{ movies.0.0.title }}')">Theaters Near Me</button>
             </div>
             <div class="col-lg-4">
               <img
@@ -93,9 +99,8 @@
             
                 <input type="submit" value="Add To Watchlist">
                 </form>
-              <form method="get" action="{% url 'theaters' %}">
-                <input type="submit" value="Theaters Near Me">
-              </form>
+              <!-- Button to Display Nearby Theaters Showing This Movie -->
+              <button onclick="theaterRedirect('{{ movies.0.1.title }}')">Theaters Near Me</button>
             </div>
             <div class="col-lg-4">
               <img
@@ -115,40 +120,38 @@
                 {% else %}
                   <button onclick="window.location.href='{% url 'login' %}?next={{ request.path }}'">Add to Watchlist</button>
                 {% endif %}
-              <form method="get" action="{% url 'theaters' %}">
-                <input type="submit" value="Theaters Near Me">
-              </form>
+              <!-- Button to Display Nearby Theaters Showing This Movie -->
+              <button onclick="theaterRedirect('{{ movies.0.2.title }}')">Theaters Near Me</button>
             </div>
           </div>
         </div>
 
         {% for movie_list in movies|slice:"1:" %}
-        <div class="carousel-item">
-          <div class="row">
-            <!-- Get three of the movies -->
-            {% for movie in movie_list %}
-            <div class="col-lg-4">
-              <img
-                src="{{ movie.movie_poster_url }}"
-                alt="Movie Poster"
-                width="200"
-                height="300"
-              />
-              <h5 class="card-title">{{ movie.title }}</h5>
-              <p class="card-text">{{ movie.description }}</p>
-              <form method="post" action="{% url 'add_to_watchlist' %}">
-                {% csrf_token %}
-                <input type="hidden" name="movie_id" value="{{ movie.tmdb_id }}">
-            
-                <input type="submit" value="Add To Watchlist">
-                </form>
-              <form method="get" action="{% url 'theaters' %}">
-                <input type="submit" value="Theaters Near Me">
-              </form>
+          <div class="carousel-item">
+            <div class="row">
+              <!-- Get three of the movies -->
+              {% for movie in movie_list %}
+              <div class="col-lg-4">
+                <img
+                  src="{{ movie.movie_poster_url }}"
+                  alt="Movie Poster"
+                  width="200"
+                  height="300"
+                />
+                <h5 class="card-title">{{ movie.title }}</h5>
+                <p class="card-text">{{ movie.description }}</p>
+                <form method="post" action="{% url 'add_to_watchlist' %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="movie_id" value="{{ movie.tmdb_id }}">
+              
+                  <input type="submit" value="Add To Watchlist">
+                  </form>
+                <!-- Button to Display Nearby Theaters Showing This Movie -->
+                <button onclick="theaterRedirect('{{ movie.title }}')">Theaters Near Me</button>
+              </div>
+              {% endfor %}
             </div>
-            {% endfor %}
           </div>
-        </div>
         {% endfor %}
 
         <a

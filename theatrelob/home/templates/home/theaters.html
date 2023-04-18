@@ -30,55 +30,51 @@
 
     <body>
         <script>
+            var markers = [];
+            var searchRadius = '30000';
+
             function initMap() {
+                const queryString = window.location.search;
+                const urlParams = new URLSearchParams(queryString);
+                const movieTitle = urlParams.get('search');
+
+                console.log(movieTitle);
+
+                var movieShowing = "movie theaters showing " + movieTitle;
 
                 navigator.geolocation.getCurrentPosition(function(position){
-                    var userLatLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-
-                    var mapOptions = {
-                        center: userLatLng,
-                        zoom: 8
+                    var userLocation = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
                     };
 
-                    var map = new google.maps.Map(document.getElementById("map"), mapOptions);
-
-                    var searchRadius = 32186.88;
-
-                    var searchRequest = {
-                        location: userLatLng,
-                        radius: searchRadius,
-                        type: 'Movie Theater'
-                    };
+                    var map = new google.maps.Map(document.getElementById('map'), { 
+                        zoom: 8,
+                        center: userLocation
+                    });
 
                     var service = new google.maps.places.PlacesService(map);
 
-                    service.nearbySearch(searchRequest, function(results, status){
+                    service.textSearch({query: movieShowing, location: userLocation}, function(results, status){
                         if (status === google.maps.places.PlacesServiceStatus.OK) {
                             for (var i = 0; i < results.length; i++) {
-                                var place = results[i];
-                                var placeLocation = place.geometry.location;
-                                var placeMarker = new google.maps.Marker({
+                                let place = results[i];
+                                let placeLocation = place.geometry.location;
+                                let placeMarker = new google.maps.Marker({
                                     position: placeLocation,
                                     map: map,
                                     title: place.name
                                 });
+
+                                placeMarker.addListener('click', function(){
+                                    map.setZoom(15);
+                                    map.setCenter(placeMarker.getPosition());
+                                });
+
+                                markers.push(placeMarker);
                             }
                         }
-                    });
-                });
-                
-                
-
-                /*var myLatLng = {lat: -34.397, lng: 150.644};
-                var map = new google.maps.Map(document.getElementById('map'), {
-                    zoom: 8,
-                    center: myLatLng
-                });
-                var marker = new google.maps.Marker({
-                    position: myLatLng,
-                    map: map,
-                    title: 'Hello World!'
-                });*/
+                    })
             }
         </script>
     </body>

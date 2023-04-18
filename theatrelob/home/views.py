@@ -123,7 +123,6 @@ def randomrec(request):
 
     while adultFlag == True:
         randomNum = random.randint(1, latestMovieId)
-        print('randomNum is', randomNum)  # Debug statement
 
         while True:
             try:
@@ -132,7 +131,6 @@ def randomrec(request):
                 break
             except requests.exceptions.HTTPError as error:
                 randomNum = random.randint(1, latestMovieId)
-                print('404 error')  # Debug statement
                 continue
 
         movie   = tmdb.Movies(randomNum)
@@ -140,8 +138,6 @@ def randomrec(request):
 
         if movInfo['adult'] == False:
             adultFlag = False
-        else:
-            print('Adult film!') # Debug statement
 
     movTitle = movInfo['title']
     poster   = movie.images()['posters']
@@ -155,7 +151,6 @@ def randomrec(request):
     return render(request, 'home/randomrec.html', {'movieTitle': movTitle, 'moviePoster': fullPostUrl}) 
 
 def theaters(request):
-    temp = 0;
     return render(request, 'home/theaters.html')
 
 # Profile views
