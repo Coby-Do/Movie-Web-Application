@@ -75,22 +75,22 @@
               />
               <h5 class="card-title">{{ movies.0.0.title }}</h5>
               <p>Description: <span id="point">...</span></p>
-              <div id="moreDescription">
+              <div id="moreDescription0">
                   <p class="card-text">{{ movies.0.0.description }}</p>
               </div>
           
-              <button onclick="hideElement()">Hide Element</button>
-              <button onclick="showElement()">Show Element</button>
+              <button onclick="hideElement0()">Hide Element</button>
+              <button onclick="showElement0()">Show Element</button>
     
               <script>
-                function hideElement() {
+                function hideElement0() {
                     console.log('Hide button clicked');
-                    document.getElementById('moreDescription').style.display = 'none';
+                    document.getElementById('moreDescription0').style.display = 'none';
                 }
             
-                function showElement() {
+                function showElement0() {
                     console.log('Show button clicked');
-                    document.getElementById('moreDescription').style.display = 'block';
+                    document.getElementById('moreDescription0').style.display = 'block';
                 }
              </script>
 
@@ -112,21 +112,21 @@
               />
               <h5 class="card-title">{{ movies.0.1.title }}</h5>
               <p>Description: <span id="point">...</span></p>
-              <div id="moreDescription">
+              <div id="moreDescription1">
                   <p class="card-text">{{ movies.0.1.description }}</p>
               </div>
           
-              <button onclick="hideElement()">Hide Element</button>
-              <button onclick="showElement()">Show Element</button>
+              <button onclick="hideElement1()">Hide Element</button>
+              <button onclick="showElement1()">Show Element</button>
               <script>
-                function hideElement() {
+                function hideElement1() {
                     console.log('Hide button clicked');
-                    document.getElementById('moreDescription').style.display = 'none';
+                    document.getElementById('moreDescription1').style.display = 'none';
                 }
             
-                function showElement() {
+                function showElement1() {
                     console.log('Show button clicked');
-                    document.getElementById('moreDescription').style.display = 'block';
+                    document.getElementById('moreDescription1').style.display = 'block';
                 }
              </script>
             
@@ -148,21 +148,21 @@
               />
               <h5 class="card-title">{{ movies.0.2.title }}</h5>
               <p>Description: <span id="point">...</span></p>
-              <div id="moreDescription">
+              <div id="moreDescription2">
                   <p class="card-text">{{ movies.0.2.description }}</p>
               </div>
           
-              <button onclick="hideElement()">Hide Element</button>
-              <button onclick="showElement()">Show Element</button>
+              <button onclick="hideElement2()">Hide Element</button>
+              <button onclick="showElement2()">Show Element</button>
               <script>
-                function hideElement() {
+                function hideElement2() {
                     console.log('Hide button clicked');
-                    document.getElementById('moreDescription').style.display = 'none';
+                    document.getElementById('moreDescription2').style.display = 'none';
                 }
             
-                function showElement() {
+                function showElement2() {
                     console.log('Show button clicked');
-                    document.getElementById('moreDescription').style.display = 'block';
+                    document.getElementById('moreDescription2').style.display = 'block';
                 }
              </script>
             
@@ -195,23 +195,13 @@
               />
               <h5 class="card-title">{{ movie.title }}</h5>
               <p>Description: <span id="point">...</span></p>
-              <div id="moreDescription">
+              <div id="moreDescriptionx">
                   <p class="card-text">{{ movie.description }}</p>
               </div>
           
-              <button onclick="hideElement()">Hide Element</button>
-              <button onclick="showElement()">Show Element</button>
-              <script>
-                function hideElement() {
-                    console.log('Hide button clicked');
-                    document.getElementById('moreDescription').style.display = 'none';
-                }
-            
-                function showElement() {
-                    console.log('Show button clicked');
-                    document.getElementById('moreDescription').style.display = 'block';
-                }
-              </script>
+              <button onclick="hideElementx()">Hide Element</button>
+              <button onclick="showElementx()">Show Element</button>
+
               <form method="post" action="{% url 'add_to_watchlist' %}">
                 {% csrf_token %}
                 <input type="hidden" name="movie_id" value="{{ movie.tmdb_id }}">
@@ -253,58 +243,67 @@
       </a>
     {% endif %}
 
-  
-    <script>
-      function toggleDescription() {
-        
-          // Get all the elements from the page
-          var points = 
-              document.getElementById("points");
-        
-          var showMoreDesc =
-              document.getElementById("moreDescription");
-        
-          var buttonDes =
-              document.getElementById("DesButton");
-        
-          // If the display property of the dots 
-          // to be displayed is already set to 
-          // 'none' (that is hidden) then this 
-          // section of code triggers
-          if (points.style.display === "none") {
-        
-              // Show the dots after the text
-              points.style.display = "inline";
-              
-              // Change the text on button to 
-              // 'Show More'
-              buttonDes.innerHTML = "Show More";
-        
-        
-              // Hide the text between the span
-              // elements
-              showMoreDesc.style.display = "none";
-          }
-        
-          // If the hidden portion is revealed,
-          // we will change it back to be hidden
-          else {
-        
-              // Hide the dots after the text
-              points.style.display = "none";
-        
-              // Change the text on button
-              // to 'Show Less'
-              buttonDes.innerHTML = "Show Less";
+  <script>
+    function hideElementx() {
+    console.log('Hide button clicked');
+    document.getElementById('moreDescriptionx').style.display = 'none';
+    }
+            
+    function showElementx() {
+    console.log('Show button clicked');
+    document.getElementById('moreDescriptionx').style.display = 'block';
+    }
+  </script>
+  <script>
+    function toggleDescription() {
+      
+        // Get all the elements from the page
+        var points = 
+            document.getElementById("points");
+      
+        var showMoreDesc =
+            document.getElementById("moreDescription");
+      
+        var buttonDes =
+            document.getElementById("DesButton");
+      
+        // If the display property of the dots 
+        // to be displayed is already set to 
+        // 'none' (that is hidden) then this 
+        // section of code triggers
+        if (points.style.display === "none") {
+      
+            // Show the dots after the text
+            points.style.display = "inline";
+            
+            // Change the text on button to 
+            // 'Show More'
+            buttonDes.innerHTML = "Show More";
+      
+      
+            // Hide the text between the span
+            // elements
+            showMoreDesc.style.display = "none";
+        }
+      
+        // If the hidden portion is revealed,
+        // we will change it back to be hidden
+        else {
+      
+            // Hide the dots after the text
+            points.style.display = "none";
+      
+            // Change the text on button
+            // to 'Show Less'
+            buttonDes.innerHTML = "Show Less";
 
-              // Show the text between the
-              // span elements
-              showMoreDesc.style.display = "inline";
-        
-          }
-      }
-    </script>
-
+            // Show the text between the
+            // span elements
+            showMoreDesc.style.display = "inline";
+      
+        }
+    }
+  </script>
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script
