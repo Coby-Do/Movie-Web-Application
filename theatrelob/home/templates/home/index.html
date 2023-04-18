@@ -64,7 +64,10 @@
                 height="300"
               />
               <h5 class="card-title">{{ movies.0.0.title }}</h5>
-              <p class="card-text">{{ movies.0.0.description }}</p>
+              <p> Description:
+                  <span id="point">...</span>
+                  <span id="moreDescription"> <p class="card-text">{{ movies.0.0.description }}</span> </p>
+                  <button onclick="toggleDescription()" id="DesButton"> Show More </button>
               <form method="post" action="{% url 'add_to_watchlist' %}">
                 {% csrf_token %}
                 <input type="hidden" name="movie_id" value="{{ movies.0.0.tmdb_id }}">
@@ -80,7 +83,10 @@
                 height="300"
               />
               <h5 class="card-title">{{ movies.0.1.title }}</h5>
-              <p class="card-text">{{ movies.0.1.description }}</p>
+              <p> Description:
+                <span id="point">...</span>
+                <span id="moreDescription"> <p class="card-text">{{ movies.0.1.description }}</span> </p>
+                <button onclick="toggleDescription()" id="DesButton"> Show More </button>
               <form method="post" action="{% url 'add_to_watchlist' %}">
                 {% csrf_token %}
                 <input type="hidden" name="movie_id" value="{{ movies.0.1.tmdb_id }}">
@@ -96,7 +102,10 @@
                 height="300"
               />
               <h5 class="card-title">{{ movies.0.2.title }}</h5>
-              <p class="card-text">{{ movies.0.2.description }}</p>
+              <p> Description:
+                <span id="point">...</span>
+                <span id="moreDescription"> <p class="card-text">{{ movies.0.2.description }}</span> </p>
+                <button onclick="toggleDescription()" id="DesButton"> Show More </button>
                 {% if user.is_authenticated %}
                 <form method="post" action="{% url 'add_to_watchlist' %}">
                   {% csrf_token %}
@@ -123,7 +132,10 @@
                 height="300"
               />
               <h5 class="card-title">{{ movie.title }}</h5>
-              <p class="card-text">{{ movie.description }}</p>
+              <p> Description:
+                <span id="point">...</span>
+                <span id="moreDescription"> <p class="card-text">{{ movies.description }}</span> </p>
+                <button onclick="toggleDescription()" id="DesButton"> Show More </button>
               <form method="post" action="{% url 'add_to_watchlist' %}">
                 {% csrf_token %}
                 <input type="hidden" name="movie_id" value="{{ movie.tmdb_id }}">
@@ -164,7 +176,54 @@
     {% endif %}
 
   
-  
+    <script>
+      function toggleDescription() {
+        
+          // Get all the elements from the page
+          var points = 
+              document.getElementById("points");
+        
+          var showMoreDesc =
+              document.getElementById("moreDescription");
+        
+          var buttonDes =
+              document.getElementById("DesButton");
+        
+          // If the display property of the dots 
+          // to be displayed is already set to 
+          // 'none' (that is hidden) then this 
+          // section of code triggers
+          if (points.style.display === "none") {
+        
+              // Hide the text between the span
+              // elements
+              showMoreDesc.style.display = "none";
+        
+              // Show the dots after the text
+              points.style.display = "inline";
+        
+              // Change the text on button to 
+              // 'Show More'
+              buttonDes.innerHTML = "Show More";
+          }
+        
+          // If the hidden portion is revealed,
+          // we will change it back to be hidden
+          else {
+        
+              // Show the text between the
+              // span elements
+              showMoreDesc.style.display = "inline";
+        
+              // Hide the dots after the text
+              points.style.display = "none";
+        
+              // Change the text on button
+              // to 'Show Less'
+              buttonDes.innerHTML = "Show Less";
+          }
+      }
+  </script>
 
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
