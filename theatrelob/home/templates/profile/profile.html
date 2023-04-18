@@ -35,6 +35,10 @@
         <button>
             <a href="{% url 'recommendList' %}">View Recommended List</a>
         </button>
+
+        <button>
+            <a href="{% url 'watchlist' %}">View Watched List</a>
+        </button>
     </ul>
     <ul>
         <h3>Homepage</h3>
@@ -44,21 +48,14 @@
     </ul>
 
     <ul>
-        <h3> Watchlist </h3>
-        <button>
-        <a href="{% url 'addedMovie' %}"> Add a Movie to The Watchlist</a>
-        </button>
-        <button>
-            <a href="{% url 'watchlist' %}">View Watched List</a>
-        </button>
-    </ul>
-    {% if user.is_authenticated %}
-    <form method="post" action="{% url 'logout' %}">
-        {% csrf_token %}
-        <button type="submit">Logout</button>
-    </form>
+        <h3> Logout </h3>
+        {% if user.is_authenticated %}
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit">Logout</button>
+        </form>
     {% endif %}
-
+    </ul>
     <h3> Integrations </h3>
     <button>
         <a href="{% url 'get_access_token' %}">Create Access Token</a>
