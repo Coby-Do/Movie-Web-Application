@@ -1,5 +1,4 @@
-<!-- profiles/templates/profiles/profile.html -->
-
+<!DOCTYPE html>
 {% block content %}
     <h2>{{ profile.user.username }}'s Profile</h2>
     <p>Movies watched: {{ profile.movies_watched }}</p>
@@ -13,43 +12,37 @@
         {% endfor %}
     </ul>
     <ul>
+        <h3>Badges</h3>
         <button>
-            <a href="{% url 'watch_movie' %}">Watch a Movie</a>
+            <a href="{% url 'create_badges' %}">Create Badges</a>
         </button>
         <button>
-            <a href="{% url 'watch_animation' %}">Watch an Animation Movie</a>
+            <a href="{% url 'delete_badges' %}">Delete Badges</a>
         </button>
-        <button>
-            <a href="{% url 'watch_documentary' %}">Watch a Documentary Movie</a>
-        </button>
-        <button>
-            <a href="{% url 'watch_action' %}">Watch a Action Movie</a>
-        </button>
-        <button>
-            <a href="{% url 'watch_comedy' %}">Watch a Comedy Movie</a>
-        </button>
-        <button>
-            <a href="{% url 'watch_romance' %}">Watch a Romance Movie</a>
-        </button>
-    </ul>
-    <ul>
         <button>
             <a href="{% url 'reset_user_badges' %}">Reset My Badges</a>
         </button>
         <button>
             <a href="{% url 'badge_list' %}">View Badge List</a>
         </button>
+    </ul>
+    <ul>
+        <h3>Movies Features</h3>
+        <button>
+            <a href="{% url 'addedMovie' %}">Add a Movie</a>
+        </button>
+        <button>
+            <a href="{% url 'watchlist' %}">View Watched List</a>
+        </button>
+    
+        <button>
+            <a href="{% url 'recommendList' %}">View Recommended List</a>
+        </button>
+    </ul>
+    <ul>
+        <h3>Homepage</h3>
         <button>
             <a href="{% url 'index' %}" class="btn btn-primary">Return to Home</a>
         </button>
-        </ul>
-
-    <button>
-        <a href="{% url 'recommendList' %}">View Recommended List</a>
-    </button>
-
-    <button>
-        <a href="{% url 'addedMovie' %}"> Add a Movie</a>
-    </button>
-
+    </ul>
 {% endblock %}
