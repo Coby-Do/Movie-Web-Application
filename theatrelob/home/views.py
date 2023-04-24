@@ -294,8 +294,8 @@ def api_search_and_add(request):
 
 def randomrec(request):
     if request.method == 'POST':
-        movTitle, fullPostUrl = randomRecGenerator()
-        return render(request, 'home/randomrec.html', {'movieTitle': movTitle, 'moviePoster': fullPostUrl})
+        movTitle, movDesc, fullPostUrl = randomRecGenerator()
+        return render(request, 'home/randomrec.html', {'movieTitle': movTitle, 'movieDesc': movDesc, 'moviePoster': fullPostUrl})
     else:
         return render(request, 'home/randomrec.html')
 

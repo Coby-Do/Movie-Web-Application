@@ -31,12 +31,16 @@ def randomRecGenerator():
             adultFlag = False
 
     movTitle = movInfo['title']
+    movDesc  = movInfo['overview']
     poster   = movie.images()['posters']
+
+    if movDesc == '':
+        movDesc = 'No description available.'
 
     if len(poster) != 0:
         partPostUrl = poster[0]['file_path']
         fullPostUrl = 'https://image.tmdb.org/t/p/original' + partPostUrl
-        return movTitle, fullPostUrl
+        return movTitle, movDesc, fullPostUrl
     else:
         fullPostUrl = 'https://www.smileysapp.com/emojis/wailing-emoji.png'
-        return movTitle, fullPostUrl
+        return movTitle, movDesc, fullPostUrl 
