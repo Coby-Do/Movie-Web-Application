@@ -3,9 +3,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.template import loader
 import json
-import random
 import tmdbsimple as tmdb
-import requests
 from .models import Integration, Movie, WatchedItem, Genre
 from django.contrib.auth.decorators import login_required
 import pandas as pd
@@ -22,6 +20,7 @@ from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.views import LoginView
 from django.views.decorators.csrf import csrf_exempt
+from commons.RandomRec import randomRecGenerator
 
 
 
@@ -294,43 +293,11 @@ def api_search_and_add(request):
     return HttpResponse(json.dumps({'success': "true"}), content_type='application/json')
 
 def randomrec(request):
-
-    adultFlag = True 
-
-    with open('secrets.json') as f:
-        secrets = json.load(f)
-        tmdb.API_KEY = secrets['tmdb_api_key']
-
-    latestMovieId = tmdb.Movies().latest()['id']
-
-    while adultFlag == True:
-        randomNum = random.randint(1, latestMovieId)
-
-        while True:
-            try:
-                response = requests.get('https://api.themoviedb.org/3/movie/' + str(randomNum) + '?api_key=' + tmdb.API_KEY)
-                response.raise_for_status()
-                break
-            except requests.exceptions.HTTPError as error:
-                randomNum = random.randint(1, latestMovieId)
-                continue
-
-        movie   = tmdb.Movies(randomNum)
-        movInfo = movie.info()
-
-        if movInfo['adult'] == False:
-            adultFlag = False
-
-    movTitle = movInfo['title']
-    poster   = movie.images()['posters']
-
-    if len(poster) != 0:
-        partPostUrl = poster[0]['file_path']
-        fullPostUrl = 'https://image.tmdb.org/t/p/original' + partPostUrl
+    if request.method == 'POST':
+        movTitle, fullPostUrl = randomRecGenerator()
+        return render(request, 'home/randomrec.html', {'movieTitle': movTitle, 'moviePoster': fullPostUrl})
     else:
-        fullPostUrl = 'https://www.smileysapp.com/emojis/wailing-emoji.png'
-
-    return render(request, 'home/randomrec.html', {'movieTitle': movTitle, 'moviePoster': fullPostUrl}) 
+        return render(request, 'home/randomrec.html')
 
 def theaters(request):
     return render(request, 'home/theaters.html')
