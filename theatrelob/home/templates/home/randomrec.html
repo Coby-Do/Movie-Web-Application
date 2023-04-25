@@ -1,49 +1,110 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
         <title>Random Movie Recommendation Generator</title>         
+
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+
+        {% load static %}
+        <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet"/>
+        <link href="{% static 'css/style.css' %}" rel="stylesheet"/>
+
+        <script src="{% static 'js/bootstrap.min.js' %}"></script>
+
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <a class="navbar-brand" href="{% url 'index' %}">TheatreLob</a>
+
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Random Movie, Login, Register, and Logout buttons-->
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'randomrec' %}">Random Movie</a>
+                </li>
+
+                {% if user.is_authenticated %}
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit">Logout</button>
+                </form>
+                {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'login' %}">Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'register' %}">Register</a>
+                </li>
+                {% endif %}
+            </ul>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav"></ul>
+            </div>
+        </nav>
+
         <style>
             .container {
                 display: grid;
-                grid-template-columns: 1fr 1fr 1fr;
+                grid-template-columns: 1fr 1fr;
+                justify-items: center;
+                padding: 20px;
+            }
+
+            .movie-container {
+                background-color: rgba(255, 196, 0, 0.877);
+                padding: 10px;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
                 justify-items: center;
             }
 
             img#poster {
                 height: auto;
                 width: 300px;
+                margin-right: 20px;
             }    
+
+            #introduction {
+                padding: 10px;
+            }
         </style>
     </head>
     <body>
-        <!-- Headings -->
-        <h1>Welcome to the Random Movie Recommendation Generator!</h1>
+        <div id="introduction">
+            <!-- Headings -->
+            <h1>Welcome to the Random Movie Recommendation Generator!</h1>
 
-        <!-- Paragraphs -->
-        <p>
-            This page will suggest a random movie for you to 
-            watch if you're in the mood for a surprise.
-            Go ahead and click the button below to view your recommendation!
-            Click the button again to generate a new recommendation! 
-        </p>
+            <!-- Paragraphs -->
+            <p>
+                This page will suggest a random movie for you to 
+                watch if you're in the mood for a surprise.
+                Go ahead and click the button below to view your recommendation!
+                Click the button again to generate a new recommendation. 
+            </p>
+        </div>
 
         <div class="container">
             <div class="button-container">
                 <form method="POST">
                     {% csrf_token %}
-                    <button id="posterButton" type="submit">Give me a rec!</button>
+                    <button type="submit">Give me a rec!</button>
                 </form>
             </div>
 
-            <div class="poster-container">
+            <div class="movie-container">
                 <img id="poster" src="{{ moviePoster }}" /> 
-            </div>
-
-            <div class="movieInfo-container">
-                <h2 id="movieTitle">{{movieTitle}}</h2>
-                <p>
-                    {{movieDesc}}
-                </p>
+                <div>
+                    <h2>
+                        {{movieTitle}}
+                    </h2>
+                    <p>
+                        {{movieDesc}}
+                    </p>
+                </div>
             </div>
         </div>
     </body>
