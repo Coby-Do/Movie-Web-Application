@@ -13,14 +13,21 @@
 
         <style>
             #map {
+                float: left;
                 height: 100%;
                 width: 50%;
             } /* Map widget styling */
 
+            #theaterList {
+                float: left;
+                height: 100%;
+                overflow-y: scroll;
+                width: 50%;
+            } /* Styling for list of theaters */
+
             html, body {
-              height: 100%;
-              margin: 10px;
-              padding: 0;
+                height: 100%;
+                padding: 10px;
             } /* HTML and body styling */
         </style>
 
@@ -29,24 +36,28 @@
         </script>
 
         <div id="map"></div>
+        <div id="theaterList"></div>
     </head>
 
     <body>
         <script>
-            var markers = [];
-            var searchRadius = '32186.88';
-
             function initMap() {
-                const urlParams = new URLSearchParams(window.location.search);
-                const movieTitle = urlParams.get('search');
-
+                const urlParams    = new URLSearchParams(window.location.search);
+                const movieTitle   = urlParams.get('search');
                 const movieShowing = "movie theaters showing " + movieTitle;
+
+                let searchRadius = 32186.88;
 
                 navigator.geolocation.getCurrentPosition(function(position){
                     var userLocation = {
                         lat: position.coords.latitude,
                         lng: position.coords.longitude
                     }; // userLocation params
+
+                    var searchBounds = new google.maps.Circle({
+                        center: userLocation,
+                        radius: searchRadius
+                    }); // query bounds 
 
                     var map = new google.maps.Map(document.getElementById('map'), { 
                         center: userLocation,
@@ -55,7 +66,14 @@
 
                     var service = new google.maps.places.PlacesService(map);
 
-                    service.textSearch({query: movieShowing, location: userLocation}, function(results, status){
+                    service.textSearch({query: movieShowing, bounds: searchBounds.getBounds()}, function(results, status){
+                        const body     = document.createElement('body');
+                        const header   = document.createElement('h1')
+                        const theaters = document.getElementById('theaterList');
+
+                        header.appendChild(document.createTextNode(`List of Theaters Showing ${movieTitle}`));
+                        body.appendChild(header);
+
                         if (status === google.maps.places.PlacesServiceStatus.OK) {
                             for (let i = 0; i < results.length; i++) {
                                 let place = results[i];
@@ -63,17 +81,28 @@
                                 let placeMarker = new google.maps.Marker({
                                     map: map,
                                     position: placeLocation,
-                                    title: place.name
+                                    title: place.name,
                                 }); // placeMarker params
 
                                 placeMarker.addListener('click', function(){
                                     map.setCenter(placeMarker.getPosition());
                                     map.setZoom(15);
                                 }); // placeMarker listeners
-
-                                markers.push(placeMarker);
+                                
+                                const p = document.createElement('p');
+                                p.appendChild(document.createTextNode(`${placeMarker.title}`));
+                                body.appendChild(p);
                             } // for
                         } // then
+
+                        else {
+                            const p = document.createElement('p');
+                            p.appendChild(document.createTextNode(`No nearby theaters are showing this movie...`));
+                            body.appendChild(p);
+                        } // else
+
+                        theaters.appendChild(body);
+
                     }) // Google Maps service 
                 }) // navigator 
             } // Function initMap()
