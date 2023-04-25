@@ -10,7 +10,6 @@
     <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet" />
     <link href="{% static 'css/style.css' %}" rel="stylesheet" />
     <script src="{% static 'js/bootstrap.min.js' %}"></script>
-
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
       <a class="navbar-brand" href="#">TheatreLob</a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -44,6 +43,8 @@
         </ul>
       </div>
     </nav>
+    
+
   </head>
   
   <body>
@@ -195,13 +196,24 @@
               />
               <h5 class="card-title">{{ movie.title }}</h5>
               <p>Description: <span id="point">...</span></p>
-              <div id="moreDescriptionx">
+              <div id="moreDescription{{ movie.tmdb_id }}">
                   <p class="card-text">{{ movie.description }}</p>
               </div>
-          
-              <button onclick="hideElementx()">Hide Element</button>
-              <button onclick="showElementx()">Show Element</button>
-
+              
+              <button onclick="hideElement('{{ movie.tmdb_id }}')">Hide Element</button>
+              <button onclick="showElement('{{ movie.tmdb_id }}')">Show Element</button>
+              
+              <script>
+                function hideElement(movieId) {
+                  console.log('Hide button clicked');
+                  document.getElementById('moreDescription' + movieId).style.display = 'none';
+                }
+                        
+                function showElement(movieId) {
+                  console.log('Show button clicked');
+                  document.getElementById('moreDescription' + movieId).style.display = 'block';
+                }
+              </script>
               <form method="post" action="{% url 'add_to_watchlist' %}">
                 {% csrf_token %}
                 <input type="hidden" name="movie_id" value="{{ movie.tmdb_id }}">
@@ -243,67 +255,7 @@
       </a>
     {% endif %}
 
-  <script>
-    function hideElementx() {
-    console.log('Hide button clicked');
-    document.getElementById('moreDescriptionx').style.display = 'none';
-    }
-            
-    function showElementx() {
-    console.log('Show button clicked');
-    document.getElementById('moreDescriptionx').style.display = 'block';
-    }
-  </script>
-  <script>
-    function toggleDescription() {
-      
-        // Get all the elements from the page
-        var points = 
-            document.getElementById("points");
-      
-        var showMoreDesc =
-            document.getElementById("moreDescription");
-      
-        var buttonDes =
-            document.getElementById("DesButton");
-      
-        // If the display property of the dots 
-        // to be displayed is already set to 
-        // 'none' (that is hidden) then this 
-        // section of code triggers
-        if (points.style.display === "none") {
-      
-            // Show the dots after the text
-            points.style.display = "inline";
-            
-            // Change the text on button to 
-            // 'Show More'
-            buttonDes.innerHTML = "Show More";
-      
-      
-            // Hide the text between the span
-            // elements
-            showMoreDesc.style.display = "none";
-        }
-      
-        // If the hidden portion is revealed,
-        // we will change it back to be hidden
-        else {
-      
-            // Hide the dots after the text
-            points.style.display = "none";
-      
-            // Change the text on button
-            // to 'Show Less'
-            buttonDes.innerHTML = "Show Less";
 
-            // Show the text between the
-            // span elements
-            showMoreDesc.style.display = "inline";
-      
-        }
-    }
-  </script>
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script
