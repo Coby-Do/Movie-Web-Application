@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('home', '0016_remove_userprofile_bio_alter_badge_description'),
+        ('home', '0018_badge_image'),
     ]
 
     operations = [
