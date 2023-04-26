@@ -11,12 +11,43 @@
     <link href="{% static 'css/style.css' %}" rel="stylesheet" />
     <script src="{% static 'js/bootstrap.min.js' %}"></script>
     <style>
+      .carousel-control-prev{
+        color: white;
+        top: 40%;
+        transform: translateY(-50%);
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background-color: #b02a37;
+        font-weight: bold;
+      }
+      .carousel-control-next {
+        color: white;
+        top: 40%;
+        transform: translateY(-50%);
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background-color: #0a58ca;
+        font-weight: bold;
+      }
+
+      .carousel-control-prev-icon,
+      .carousel-control-next-icon {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        background-size: 100% 100%;
+        background-repeat: no-repeat;
+        background-position: center;
+      }
       .nav-button {
         margin-right: 10px;
       }
       .navbar-brand-custom {
         padding-left: 15px;
       }
+      
     </style>
     
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
