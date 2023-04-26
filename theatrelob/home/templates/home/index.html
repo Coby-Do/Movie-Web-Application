@@ -12,10 +12,10 @@
     <script src="{% static 'js/bootstrap.min.js' %}"></script>
     <style>
       .nav-button {
-          margin-right: 10px;
+        margin-right: 10px;
       }
       .navbar-brand-custom {
-          padding-left: 15px;
+        padding-left: 15px;
       }
     </style>
     
@@ -77,76 +77,97 @@
           <div class="row">
             <div class="col-lg-4">
               <img
-                src="{{ movies.0.0.movie_poster_url }}"
-                alt="Movie Poster"
-                width="200"
-                height="300"
+                  src="{{ movies.0.0.movie_poster_url }}"
+                  alt="Movie Poster"
+                  width="200"
+                  height="300"
               />
               <h5 class="card-title">{{ movies.0.0.title }}</h5>
-              <p>Description: <span id="point">...</span></p>
-              <div id="moreDescription0">
+              <p>Description: <span id="point{{ movies.0.0.tmdb_id }}">...</span></p>
+              <div id="moreDescription{{ movies.0.0.tmdb_id }}" style="display: none;">
                   <p class="card-text">{{ movies.0.0.description }}</p>
               </div>
-          
-              <button onclick="hideElement0()">Hide Description</button>
-              <button onclick="showElement0()">Show Description</button>
-    
-              <script>
-                function hideElement0() {
-                    console.log('Hide button clicked');
-                    document.getElementById('moreDescription0').style.display = 'none';
-                }
-            
-                function showElement0() {
-                    console.log('Show button clicked');
-                    document.getElementById('moreDescription0').style.display = 'block';
-                }
-             </script>
 
-              <form method="post" action="{% url 'add_to_watchlist' %}">
-                {% csrf_token %}
-                <input type="hidden" name="movie_id" value="{{ movies.0.0.tmdb_id }}">
-            
-                <input type="submit" value="Add To Watchlist">
-                </form>
-              <!-- Button to Display Nearby Theaters Showing This Movie -->
-              <button onclick="theaterRedirect('{{ movies.0.0.title }}')">Theaters Near Me</button>
+              <div style="padding-bottom: 10px; padding-top: 20px;">
+                  <button class="btn btn-danger nav-button" onclick="hideElement('{{ movies.0.0.tmdb_id }}')">Hide Description</button>
+                  <button class="btn btn-success nav-button" onclick="showElement('{{ movies.0.0.tmdb_id }}')">Show Description</button>
+              </div>
+
+              <div>
+                  {% if user.is_authenticated %}
+                  <form method="post" action="{% url 'add_to_watchlist' %}">
+                      {% csrf_token %}
+                      <input type="hidden" name="movie_id" value="{{ movies.0.0.tmdb_id }}">
+                      <input class="btn btn-primary nav-button" type="submit" value="Add To Watchlist">
+                  </form>
+                  {% else %}
+                  <button class="btn btn-primary nav-button" onclick="window.location.href='{% url 'login' %}?next={{ request.path }}'">Add to Watchlist</button>
+                  {% endif %}
+                  <!-- Button to Display Nearby Theaters Showing This Movie -->
+                  <button class="btn btn-primary nav-button" onclick="theaterRedirect('{{ movies.0.0.title }}')">Theaters Near Me</button>
+              </div>
+
+              <script>
+                  function hideElement(movieId) {
+                      console.log('Hide button clicked');
+                      document.getElementById('moreDescription' + movieId).style.display = 'none';
+                      document.getElementById('point' + movieId).style.display = 'inline';
+                  }
+
+                  function showElement(movieId) {
+                      console.log('Show button clicked');
+                      document.getElementById('moreDescription' + movieId).style.display = 'block';
+                      document.getElementById('point' + movieId).style.display = 'none';
+                  }
+              </script>
+
             </div>
             <div class="col-lg-4">
               <img
-                src="{{ movies.0.1.movie_poster_url }}"
-                alt="Movie Poster"
-                width="200"
-                height="300"
+                  src="{{ movies.0.1.movie_poster_url }}"
+                  alt="Movie Poster"
+                  width="200"
+                  height="300"
               />
               <h5 class="card-title">{{ movies.0.1.title }}</h5>
-              <p>Description: <span id="point">...</span></p>
-              <div id="moreDescription1">
+              <p>Description: <span id="point{{ movies.0.1.tmdb_id }}">...</span></p>
+              <div id="moreDescription{{ movies.0.1.tmdb_id }}" style="display: none;">
                   <p class="card-text">{{ movies.0.1.description }}</p>
               </div>
-          
-              <button onclick="hideElement1()">Hide Description</button>
-              <button onclick="showElement1()">Show Description</button>
+
+              <div style="padding-bottom: 10px; padding-top: 20px;">
+                  <button class="btn btn-danger nav-button" onclick="hideElement('{{ movies.0.1.tmdb_id }}')">Hide Description</button>
+                  <button class="btn btn-success nav-button" onclick="showElement('{{ movies.0.1.tmdb_id }}')">Show Description</button>
+              </div>
+
+              <div>
+                  {% if user.is_authenticated %}
+                  <form method="post" action="{% url 'add_to_watchlist' %}">
+                      {% csrf_token %}
+                      <input type="hidden" name="movie_id" value="{{ movies.0.1.tmdb_id }}">
+                      <input class="btn btn-primary nav-button" type="submit" value="Add To Watchlist">
+                  </form>
+                  {% else %}
+                  <button class="btn btn-primary nav-button" onclick="window.location.href='{% url 'login' %}?next={{ request.path }}'">Add to Watchlist</button>
+                  {% endif %}
+                  <!-- Button to Display Nearby Theaters Showing This Movie -->
+                  <button class="btn btn-primary nav-button" onclick="theaterRedirect('{{ movies.0.1.title }}')">Theaters Near Me</button>
+              </div>
+
               <script>
-                function hideElement1() {
-                    console.log('Hide button clicked');
-                    document.getElementById('moreDescription1').style.display = 'none';
-                }
-            
-                function showElement1() {
-                    console.log('Show button clicked');
-                    document.getElementById('moreDescription1').style.display = 'block';
-                }
-             </script>
-            
-              <form method="post" action="{% url 'add_to_watchlist' %}">
-                {% csrf_token %}
-                <input type="hidden" name="movie_id" value="{{ movies.0.1.tmdb_id }}">
-            
-                <input type="submit" value="Add To Watchlist">
-                </form>
-              <!-- Button to Display Nearby Theaters Showing This Movie -->
-              <button onclick="theaterRedirect('{{ movies.0.1.title }}')">Theaters Near Me</button>
+                  function hideElement(movieId) {
+                      console.log('Hide button clicked');
+                      document.getElementById('moreDescription' + movieId).style.display = 'none';
+                      document.getElementById('point' + movieId).style.display = 'inline';
+                  }
+
+                  function showElement(movieId) {
+                      console.log('Show button clicked');
+                      document.getElementById('moreDescription' + movieId).style.display = 'block';
+                      document.getElementById('point' + movieId).style.display = 'none';
+                  }
+              </script>
+
             </div>
             <div class="col-lg-4">
               <img
@@ -156,36 +177,44 @@
                 height="300"
               />
               <h5 class="card-title">{{ movies.0.2.title }}</h5>
-              <p>Description: <span id="point">...</span></p>
-              <div id="moreDescription2">
+              <p>Description: <span id="point{{ movies.0.2.tmdb_id }}">...</span></p>
+              <div id="moreDescription{{ movies.0.2.tmdb_id }}" style="display: none;">
                   <p class="card-text">{{ movies.0.2.description }}</p>
               </div>
-          
-              <button onclick="hideElement2()">Hide Description</button>
-              <button onclick="showElement2()">Show Description</button>
+
+              <div style="padding-bottom: 10px; padding-top: 20px;">
+                  <button class="btn btn-danger nav-button" onclick="hideElement('{{ movies.0.2.tmdb_id }}')">Hide Description</button>
+                  <button class="btn btn-success nav-button" onclick="showElement('{{ movies.0.2.tmdb_id }}')">Show Description</button>
+              </div>
+
+              <div>
+                  {% if user.is_authenticated %}
+                  <form method="post" action="{% url 'add_to_watchlist' %}">
+                      {% csrf_token %}
+                      <input type="hidden" name="movie_id" value="{{ movies.0.2.tmdb_id }}">
+                      <input class="btn btn-primary nav-button" type="submit" value="Add To Watchlist">
+                  </form>
+                  {% else %}
+                  <button class="btn btn-primary nav-button" onclick="window.location.href='{% url 'login' %}?next={{ request.path }}'">Add to Watchlist</button>
+                  {% endif %}
+                  <!-- Button to Display Nearby Theaters Showing This Movie -->
+                  <button class="btn btn-primary nav-button" onclick="theaterRedirect('{{ movies.0.2.title }}')">Theaters Near Me</button>
+              </div>
+
               <script>
-                function hideElement2() {
-                    console.log('Hide button clicked');
-                    document.getElementById('moreDescription2').style.display = 'none';
-                }
-            
-                function showElement2() {
-                    console.log('Show button clicked');
-                    document.getElementById('moreDescription2').style.display = 'block';
-                }
-             </script>
-            
-                {% if user.is_authenticated %}
-                <form method="post" action="{% url 'add_to_watchlist' %}">
-                  {% csrf_token %}
-                  <input type="hidden" name="movie_id" value="{{ movies.0.2.tmdb_id }}">
-                  <input type="submit" value="Add To Watchlist">
-                </form>
-                {% else %}
-                  <button onclick="window.location.href='{% url 'login' %}?next={{ request.path }}'">Add to Watchlist</button>
-                {% endif %}
-              <!-- Button to Display Nearby Theaters Showing This Movie -->
-              <button onclick="theaterRedirect('{{ movies.0.2.title }}')">Theaters Near Me</button>
+                  function hideElement(movieId) {
+                      console.log('Hide button clicked');
+                      document.getElementById('moreDescription' + movieId).style.display = 'none';
+                      document.getElementById('point' + movieId).style.display = 'inline';
+                  }
+
+                  function showElement(movieId) {
+                      console.log('Show button clicked');
+                      document.getElementById('moreDescription' + movieId).style.display = 'block';
+                      document.getElementById('point' + movieId).style.display = 'none';
+                  }
+              </script>
+
             </div>
           </div>
         </div>
@@ -197,39 +226,45 @@
             {% for movie in movie_list %}
             <div class="col-lg-4">
               <img
-                src="{{ movie.movie_poster_url }}"
-                alt="Movie Poster"
-                width="200"
-                height="300"
+                  src="{{ movie.movie_poster_url }}"
+                  alt="Movie Poster"
+                  width="200"
+                  height="300"
               />
               <h5 class="card-title">{{ movie.title }}</h5>
-              <p>Description: <span id="point">...</span></p>
-              <div id="moreDescription{{ movie.tmdb_id }}">
+              <p>Description: <span id="point{{ movie.tmdb_id }}">...</span></p>
+              <div id="moreDescription{{ movie.tmdb_id }}" style="display: none;">
                   <p class="card-text">{{ movie.description }}</p>
               </div>
-              
-              <button onclick="hideElement('{{ movie.tmdb_id }}')">Hide Description</button>
-              <button onclick="showElement('{{ movie.tmdb_id }}')">Show Description</button>
-              
+
+              <div style="padding-bottom: 10px; padding-top: 20px;">
+                  <button class="btn btn-danger nav-button" onclick="hideElement('{{ movie.tmdb_id }}')">Hide Description</button>
+                  <button class="btn btn-success nav-button" onclick="showElement('{{ movie.tmdb_id }}')">Show Description</button>
+              </div>
+
+              <div>
+                  <form method="post" action="{% url 'add_to_watchlist' %}" style="display: inline-block;">
+                      {% csrf_token %}
+                      <input type="hidden" name="movie_id" value="{{ movie.tmdb_id }}">
+                      <input class="btn btn-primary nav-button" type="submit" value="Add To Watchlist">
+                  </form>
+                  <!-- Button to Display Nearby Theaters Showing This Movie -->
+                  <button class="btn btn-primary nav-button" onclick="theaterRedirect('{{ movie.title }}')" style="display: inline-block;">Theaters Near Me</button>
+              </div>
+
               <script>
-                function hideElement(movieId) {
-                  console.log('Hide button clicked');
-                  document.getElementById('moreDescription' + movieId).style.display = 'none';
-                }
-                        
-                function showElement(movieId) {
-                  console.log('Show button clicked');
-                  document.getElementById('moreDescription' + movieId).style.display = 'block';
-                }
+                  function hideElement(movieId) {
+                      console.log('Hide button clicked');
+                      document.getElementById('moreDescription' + movieId).style.display = 'none';
+                      document.getElementById('point' + movieId).style.display = 'inline';
+                  }
+
+                  function showElement(movieId) {
+                      console.log('Show button clicked');
+                      document.getElementById('moreDescription' + movieId).style.display = 'block';
+                      document.getElementById('point' + movieId).style.display = 'none';
+                  }
               </script>
-              <form method="post" action="{% url 'add_to_watchlist' %}">
-                {% csrf_token %}
-                <input type="hidden" name="movie_id" value="{{ movie.tmdb_id }}">
-            
-                <input type="submit" value="Add To Watchlist">
-                </form>
-              <!-- Button to Display Nearby Theaters Showing This Movie -->
-              <button onclick="theaterRedirect('{{ movie.title }}')">Theaters Near Me</button>
             </div>
             {% endfor %}
           </div>
