@@ -20,9 +20,9 @@ from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.views import LoginView
 from django.views.decorators.csrf import csrf_exempt
+from .forms import UpdateProfileForm
+from django.core.files import File
 from commons.RandomRec import randomRecGenerator
-
-
 
 def index(request):
     # display a movie from tmbd api
@@ -162,9 +162,9 @@ def add_to_watchlist(request):
         # Update the number of movies watched
         profile.movies_watched += 1
 
-        # Update genre count for each genre in the movie
-        for genre in m.genres.all():
-            profile.update_genres_watched(genre.name)
+        # # Update genre count for each genre in the movie
+        # for genre in m.genres.all():
+        #     profile.update_genres_watched(genre.name)
         
 
         profile.save()
@@ -367,6 +367,21 @@ def profile(request, username):
         # Redirect the user back to the homepage if the user isn't validated
         return HttpResponseRedirect(reverse('index'))
 
+@login_required
+def update_profile(request):
+    if request.method == 'POST':
+        form = UpdateProfileForm(request.POST, request.FILES, instance=request.user.userprofile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Your profile picture has been updated!')
+            return redirect('profile', username=request.user.username)
+    else:
+        form = UpdateProfileForm(instance=request.user.userprofile)
+
+    context = {'form': form}
+    return render(request, 'profile/update_profile.html', context)
+
+
 # Handles the list of badges views
 def badge_list(request):
     # Validates the user
@@ -390,161 +405,183 @@ def create_badges(request):
     badges_data = [
         {
             'name': '10 Movies Watched',
-            'description': 'Watch 10 movies.',
+            'description': 'Watch 10 movies',
             'type': 'movies_watched',
-            'requirement': 10
+            'requirement': 10,
+            'image': '10.png'
         },
         {
             'name': '20 Movies Watched',
-            'description': 'Watch 20 movies.',
+            'description': 'Watch 20 movies',
             'type': 'movies_watched',
-            'requirement': 20
+            'requirement': 20,
+            'image': '20.png'
         },
         {
             'name': 'Genre Enthusiast',
-            'description': 'Watch movies from 5 different genres.',
+            'description': 'Watch movies from 5 different genres',
             'type': 'genres_watched',
-            'requirement': 5
+            'requirement': 5,
+            'image': 'genre.png'
         },
         {
             'name': "Dom Toretto's Family",
-            'description': 'Watch 5 Action Movies.',
+            'description': 'Watch 5 Action Movies',
             'type': 'genre',
             'genre': 'Action',
-            'requirement': 5
+            'requirement': 5,
+            'image': 'tor.jpg'
         },
         {
             'name': "Indiana Jone's Party",
-            'description': 'Watch 5 Adventure Movies.',
+            'description': 'Watch 5 Adventure Movies',
             'type': 'genre',
             'genre': 'Adventure',
-            'requirement': 5
+            'requirement': 5,
+            'image': 'indiana.jpg'
         },
         {
-            'name': "Micky's Clubhouse",
-            'description': 'Watch 5 Animation Movies.',
+            'name': "Mickey's Clubhouse",
+            'description': 'Watch 5 Animation Movies',
             'type': 'genre',
             'genre': 'Animation',
-            'requirement': 5
+            'requirement': 5,
+            'image': 'mickey.png'
         },
         {
             'name': "McLovin's BFF",
-            'description': 'Watch 5 Comedy Movies.',
+            'description': 'Watch 5 Comedy Movies',
             'type': 'genre',
             'genre': 'Comedy',
-            'requirement': 5
+            'requirement': 5,
+            'image': 'mclovin.jpg'
         },
         {
             'name': "John Wick's Hitlist",
-            'description': 'Watch 5 Crime Movies.',
+            'description': 'Watch 5 Crime Movies',
             'type': 'genre',
             'genre': 'Crime',
-            'requirement': 5
+            'requirement': 5,
+            'image': 'wick.png'
         },
         {
             'name': "Tiger King's Lil Kitten",
-            'description': 'Watch 5 Documentary Movies.',
+            'description': 'Watch 5 Documentary Movies',
             'type': 'genre',
             'genre': 'Documentary',
-            'requirement': 5
+            'requirement': 5,
+            'image': 'tiger.png'
         },
         {
             'name': "Rocky's Opponent",
-            'description': 'Watch 5 Drama Movies.',
+            'description': 'Watch 5 Drama Movies',
             'type': 'genre',
             'genre': 'Drama',
-            'requirement': 5
+            'requirement': 5,
+            'image': 'rocky.png'
         },
         {
             'name': "Shrek Is love Shrek Is Life",
-            'description': 'Watch 5 Family Movies.',
+            'description': 'Watch 5 Family Movies',
             'type': 'genre',
             'genre': 'Family',
-            'requirement': 5
+            'requirement': 5,
+            'image': 'shrekw.png'
         },
         {
-            'name': "Lord Voldemort's Follower",
-            'description': 'Watch 5 Fantasy Movies.',
+            'name': "Voldemort's Follower",
+            'description': 'Watch 5 Fantasy Movies',
             'type': 'genre',
             'genre': 'Fantasy',
-            'requirement': 5
+            'requirement': 5,
+            'image': 'voldemort.png'
         },
         {
-            'name': "Apollo 13's Hidden Crew Member",
-            'description': 'Watch 5 History Movies.',
+            'name': "Apollo 13's Crew Member",
+            'description': 'Watch 5 History Movies',
             'type': 'genre',
             'genre': 'History',
-            'requirement': 5
+            'requirement': 5,
+            'image': 'apollo.png'
         },
         {
-            'name': "Michael Myer's Next Target",
-            'description': 'Watch 5 Horror Movies.',
+            'name': "Michael Myer's Target",
+            'description': 'Watch 5 Horror Movies',
             'type': 'genre',
             'genre': 'Horror',
-            'requirement': 5
+            'requirement': 5,
+            'image': 'myers.jpg'
         },
         {
             'name': "Dorothy's Friend",
-            'description': 'Watch 5 Music Movies.',
+            'description': 'Watch 5 Music Movies',
             'type': 'genre',
             'genre': 'Music',
-            'requirement': 5
+            'requirement': 5,
+            'image': 'oz.png'
         },
         {
             'name': "???",
-            'description': 'Watch 5 Mystery Movies.',
+            'description': 'Watch 5 Mystery Movies',
             'type': 'genre',
             'genre': 'Mystery',
-            'requirement': 5
+            'requirement': 5,
+            'image': 'question.jpg'
         },
         {
-            'name': 'Fifty Shades of Software Sweethearts',
-            'description': 'Watch 5 Romance Movies.',
+            'name': 'Fifty Shades of Software',
+            'description': 'Watch 5 Romance Movies',
             'type': 'genre',
             'genre': 'Romance',
-            'requirement': 5
+            'requirement': 5,
+            'image': 'fiftyshades.png'
         },
         {
-            'name': "Blade Runner's Cyberpunk Circle",
-            'description': 'Watch 5 Science Fiction Movies.',
+            'name': "Blade Runner's Circle",
+            'description': 'Watch 5 Science Fiction Movies',
             'type': 'genre',
             'genre': 'Science Fiction',
-            'requirement': 5
+            'requirement': 5,
+            'image': 'bladerunner.png'
         },
         {
             'name': "Parsite's Cunning Crew",
-            'description': 'Watch 5 Thriller Movies.',
+            'description': 'Watch 5 Thriller Movies',
             'type': 'genre',
             'genre': 'Thriller',
-            'requirement': 5
+            'requirement': 5,
+            'image': 'parasite.png'
         },
         {
             'name': 'Couch Potato',
-            'description': 'Watch 5 TV Movie Movies.',
+            'description': 'Watch 5 TV Movie Movies',
             'type': 'genre',
             'genre': 'TV Movie',
-            'requirement': 5
+            'requirement': 5,
+            'image': 'potato.png'
         },
         {
             'name': 'American Snipers Enemy',
-            'description': 'Watch 5 War Movies.',
+            'description': 'Watch 5 War Movies',
             'type': 'genre',
             'genre': 'War',
-            'requirement': 5
+            'requirement': 5,
+            'image': 'sniper.png'
         },
         {
             'name': 'The Elite Gunslinger',
-            'description': 'Watch 5 Western Movies.',
+            'description': 'Watch 5 Western Movies',
             'type': 'genre',
             'genre': 'Western',
-            'requirement': 5
+            'requirement': 5,
+            'image': 'gunslinger.png'
         },
     ]
 
     # Iterating through the badge data
     for badge_data in badges_data:
         # Creates the badge object or get it if it already exists
-        Badge.objects.get_or_create(
+        badge, created = Badge.objects.get_or_create(
             # Obtaining the name, description, type, genre, and requirement criteras
             name=badge_data['name'],
             description=badge_data['description'],
@@ -552,6 +589,10 @@ def create_badges(request):
             genre=badge_data.get('genre', ''),
             requirement=badge_data.get('requirement', 0),
         )
+        if created:
+            image_path = os.path.join(settings.MEDIA_ROOT, 'badges', badge_data['image'])
+            with open(image_path, 'rb') as image_file:
+                badge.image.save(badge_data['image'], File(image_file))
 
     # Send a reponse to indicate that the badges have been created 
     return HttpResponse("Badges created!")

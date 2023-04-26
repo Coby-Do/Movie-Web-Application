@@ -1,14 +1,69 @@
-<!DOCTYPE html>
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    Badge List
+{% endblock %}
+
+{% block head_extra %}
+<style>
+    .badge-success {
+        background-color: #32cd32 !important;
+        color: white !important;
+    }
+    .badge-unsuccess {
+        background-color: #FF2400 !important;
+        color: white !important;
+    }
+    .table-bordered {
+        border: 1px solid #dee2e6;
+    }
+    .rounded-table {
+        border-collapse: separate;
+        border-spacing: 0;
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
+    .table-bordered > tbody > tr > td {
+        border: 1px solid #dee2e6;
+    }
+    h1 {
+        text-align: center;
+        padding-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-    <h2>Badge List</h2>
-    <ul>
-        {% for badge in badges %}
-            {% if badge in profile.badges.all %}
-                <li>{{ badge.name }}: {{ badge.description }} - <span style="color: #66FF00;"><strong>Completed</strong></span></li>
-            {% else %}
-                <li>{{ badge.name }}: {{ badge.description }} - <span style="color: red;"><strong>Uncompleted</strong></span></li>
-            {% endif %}
-        {% endfor %}
-    </ul>
-    <a href="{% url 'profile' request.user.username %}" class="btn btn-primary">Return to Profile</a>
+    <div class="row">
+        <div class="col-md-12">
+            <h1>Badge List</h1>
+            <table class="table table-bordered rounded-table">
+                <thead>
+                    <tr class="font-weight-bold text-center">
+                        <th scope="col">Badge Name</th>
+                        <th scope="col">Description</th>
+                        <th scope="col">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for badge in badges %}
+                        {% if badge in profile.badges.all %}
+                            <tr>
+                                <td class="text-center">{{ badge.name }}</td>
+                                <td class="text-center">{{ badge.description }}</td>
+                                <td class="text-center"><span class="badge badge-success">Completed</span></td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td class="text-center">{{ badge.name }}</td>
+                                <td class="text-center">{{ badge.description }}</td>
+                                <td class="text-center"><span class="badge badge-unsuccess">Uncompleted</span></td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 {% endblock %}

@@ -1,81 +1,139 @@
+{% load static %}
 <!DOCTYPE html>
-{% block content %}
-    <h2>{{ profile.user.username }}'s Profile</h2>
-    <p>Movies watched: {{ profile.movies_watched }}</p>
-
-    <h3>Earned Badges</h3>
-    <ul>
-        {% for badge in profile.badges.all %}
-        <li>{{ badge.name }}: {{ badge.description }}</li>
-        {% empty %}
-        <li>No badges earned yet.</li>
-        {% endfor %}
-    </ul>
-    <ul>
-        <h3>Badges</h3>
-        <button>
-            <a href="{% url 'create_badges' %}">Create Badges</a>
-        </button>
-        <button>
-            <a href="{% url 'delete_badges' %}">Delete Badges</a>
-        </button>
-        <button>
-            <a href="{% url 'reset_user_badges' %}">Reset My Badges</a>
-        </button>
-        <button>
-            <a href="{% url 'badge_list' %}">View Badge List</a>
-        </button>
-    </ul>
-    <ul>
-        <h3>Movies Features</h3>
-        <button>
-            <a href="{% url 'addedMovie' %}">Add a Movie</a>
-        </button>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ profile.user.username }}'s Profile</title>
+    {% block head_extra %}
+        <style>
+            .profile-img {
+                width: 200px;
+                height: 200px;
+                object-fit: cover;
+            }
+        </style>
+    {% endblock %}
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet" />
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+</head>
+<body>
+    <style>
+        .nav-button {
+            margin-right: 10px;
+        }
+        .navbar-brand-custom {
+            padding-left: 15px;
+        }
+        .button-title {
+            text-align: center
+        }
+    </style>
     
-        <button>
-            <a href="{% url 'recommendList' %}">View Recommended List</a>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand navbar-brand-custom" href="{% url 'index' %}">TheatreLob</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
         </button>
+        <div class="collapse navbar-collapse d-flex justify-content-between" id="navbarNav">
+            <ul class="navbar-nav">
+            </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    {% if request.user.is_authenticated %}
+                    <a href="{% url 'profile' username=request.user.username %}" class="btn btn-dark nav-button">
+                        Profile
+                    </a>
+                    {% endif %}
+                </li>
+                <li class="nav-item">
+                    {% if user.is_authenticated %}
+                    <form method="post" action="{% url 'logout' %}" class="form-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-dark nav-button">Logout</button>
+                    </form>
+                    {% endif %}
+                </li>
+                {% comment %} Insert More Nav Bar Items Here {% endcomment %}
+            </ul>
+        </div>
+    </nav>
 
-        <button>
-            <a href="{% url 'watchlist' %}">View Watched List</a>
-        </button>
-    </ul>
-    <ul>
-        <h3>Homepage</h3>
-        <button>
-            <a href="{% url 'index' %}" class="btn btn-primary">Return to Home</a>
-        </button>
-    </ul>
-
-    <ul>
-        <h3> Logout </h3>
-        {% if user.is_authenticated %}
-        <form method="post" action="{% url 'logout' %}">
-            {% csrf_token %}
-            <button type="submit">Logout</button>
-        </form>
-    {% endif %}
-    </ul>
-    <h3> Integrations </h3>
-    <button>
-        <a href="{% url 'get_access_token' %}">Create Access Token</a>
-    </button>
-    {% for integration in integrations %}
-    <ul>
-        <li>
-            <a>{{ integration.name }}</a>
-            <a> {{ integration.access_token }} </a>
-            <form method="post" action="{% url 'delete_access_token' %}">
-                {% csrf_token %}
-                <input type="hidden" name="access_token" value="{{ integration.access_token }}">
-            
-                <input type="submit" value="Delete">
-                </form>
-
-        </li>
-    </ul>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-3">
+                <img src="{{ profile.image.url }}" alt="{{ profile.user.username }}'s profile picture" class="img-thumbnail profile-img">
+                <a href="{% url 'update_profile' %}" class="btn btn-primary mt-3">Change Photo</a>
+            </div>
+            <div class="col-md-6">
+                <h2>{{ profile.user.username }}'s Profile</h2>
+                <p>Movies Watched: {{ profile.movies_watched }}</p>
+                
+                <h3>Earned Badges</h3>
+                <p>Badges Earned: {{ profile.badges.all|length }}</p>
+                <div class="row">
+                    {% for badge in profile.badges.all %}
+                    <div class="col-md-4 text-center">
+                        <img src="{{ badge.image.url }}" alt="{{ badge.name }} badge" width="50" height="50">
+                        <p>{{ badge.name }}</p>
+                    </div>
+                    {% empty %}
+                    <div class="col-md-12">
+                        <p>No badges earned yet.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-3">
+                <h3 class="button-title">Badges</h3>
+                <div class="mb-3">
+                    <a href="{% url 'create_badges' %}" class="btn btn-success mb-2 d-block">Create Badges</a>
+                    <a href="{% url 'delete_badges' %}" class="btn btn-danger mb-2 d-block">Delete Badges</a>
+                    <a href="{% url 'reset_user_badges' %}" class="btn btn-warning mb-2 d-block">Reset Badges</a>
+                    <a href="{% url 'badge_list' %}" class="btn btn-primary mb-2 d-block">View Badge List</a>
+                </div>
+                <h3 class="button-title">Movie Features</h3>
+                <div class="mb-3">
+                    <a href="{% url 'addedMovie' %}" class="btn btn-dark mb-2 d-block">Add Movies</a>
+                    <a href="{% url 'randomrec' %}" class="btn btn-dark mb-2 d-block">Random Movie</a>
+                    <a href="{% url 'recommendList' %}" class="btn btn-dark mb-2 d-block">View Recommended List</a>
+                    <a href="{% url 'watchlist' %}" class="btn btn-dark mb-2 d-block">View Watched List</a>
+                </div>
+                <h3 class="button-title">Integrations</h3>
+                <div class="text-center mb-3">
+                    <a href="{% url 'get_access_token' %}" class="btn btn-primary">Create Access Token</a>
+                </div>
+                {% for integration in integrations %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ integration.name }}</h5>
+                        <p class="card-text">{{ integration.access_token }}</p>
+                        <form method="post" action="{% url 'delete_access_token' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="access_token" value="{{ integration.access_token }}">
+                            <input type="submit" class="btn btn-danger" value="Delete">
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
     
-    {% endfor %}
 
-
-{% endblock %}
+    <script
+        src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"
+    ></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"
+    ></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"
+    ></script>
+</body>
