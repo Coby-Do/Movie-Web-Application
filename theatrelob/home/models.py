@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-
+from django.conf import settings
 # Imports for recommendation system
 import numpy as np
 import pandas as pd
@@ -48,6 +48,9 @@ class Badge(models.Model):
     badge_type = models.CharField(max_length=50)
     genre = models.CharField(max_length=50, blank=True)
 
+    # Badge image
+    image = models.ImageField(upload_to='badges/')
+
     # Defines the requirement as an integer
     requirement = models.IntegerField()
 
@@ -72,6 +75,9 @@ def format_genre_name(genre):
 class UserProfile(models.Model):
     # Defines the user to a single user, the UserProfile's instance will be deleted if the User's instance is deleted
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+
+    # Defines profile image
+    image = models.ImageField(default='default.jpg', upload_to='profile_pics')
 
     # Defines the number of movies watched as an integer
     movies_watched = models.PositiveIntegerField(default=0)
@@ -134,6 +140,9 @@ class UserProfile(models.Model):
                     else:
                         genre_counts[genre] = 1
 
+        # Calculate the total number of different genres watched
+        total_different_genres_watched = len(genre_counts)
+
         # Check if the user meets the badge requirements based on the genre counts
         for badge in badges:
             # Checking for the correct badge type, validating badge requirement and whether the user already possesses the badge
@@ -154,6 +163,9 @@ class UserProfile(models.Model):
                 if genre_count >= badge.requirement and badge not in self.badges.all():
                     self.badges.add(badge)
                     newly_earned_badges.append(badge)
+            elif badge.badge_type == 'genres_watched' and total_different_genres_watched >= badge.requirement and badge not in self.badges.all():
+                self.badges.add(badge)
+                newly_earned_badges.append(badge)
 
         # Return the list of newly earned badges
         return newly_earned_badges
