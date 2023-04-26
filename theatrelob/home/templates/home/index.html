@@ -94,17 +94,17 @@
               </div>
 
               <div>
-                  {% if user.is_authenticated %}
-                  <form method="post" action="{% url 'add_to_watchlist' %}">
-                      {% csrf_token %}
-                      <input type="hidden" name="movie_id" value="{{ movies.0.0.tmdb_id }}">
-                      <input class="btn btn-primary nav-button" type="submit" value="Add To Watchlist">
-                  </form>
-                  {% else %}
-                  <button class="btn btn-primary nav-button" onclick="window.location.href='{% url 'login' %}?next={{ request.path }}'">Add to Watchlist</button>
-                  {% endif %}
-                  <!-- Button to Display Nearby Theaters Showing This Movie -->
-                  <button class="btn btn-primary nav-button" onclick="theaterRedirect('{{ movies.0.0.title }}')">Theaters Near Me</button>
+                {% if user.is_authenticated %}
+                <form method="post" action="{% url 'add_to_watchlist' %}" style="display: inline-block;">
+                    {% csrf_token %}
+                    <input type="hidden" name="movie_id" value="{{ movies.0.0.tmdb_id }}">
+                    <input class="btn btn-primary nav-button" type="submit" value="Add To Watchlist">
+                </form>
+                {% else %}
+                <button class="btn btn-primary nav-button" onclick="window.location.href='{% url 'login' %}?next={{ request.path }}'" style="display: inline-block;">Add to Watchlist</button>
+                {% endif %}
+                <!-- Button to Display Nearby Theaters Showing This Movie -->
+                <button class="btn btn-primary nav-button" onclick="theaterRedirect('{{ movies.0.0.title }}')" style="display: inline-block;">Theaters Near Me</button>
               </div>
 
               <script>
@@ -141,18 +141,19 @@
               </div>
 
               <div>
-                  {% if user.is_authenticated %}
-                  <form method="post" action="{% url 'add_to_watchlist' %}">
-                      {% csrf_token %}
-                      <input type="hidden" name="movie_id" value="{{ movies.0.1.tmdb_id }}">
-                      <input class="btn btn-primary nav-button" type="submit" value="Add To Watchlist">
-                  </form>
-                  {% else %}
-                  <button class="btn btn-primary nav-button" onclick="window.location.href='{% url 'login' %}?next={{ request.path }}'">Add to Watchlist</button>
-                  {% endif %}
-                  <!-- Button to Display Nearby Theaters Showing This Movie -->
-                  <button class="btn btn-primary nav-button" onclick="theaterRedirect('{{ movies.0.1.title }}')">Theaters Near Me</button>
+                {% if user.is_authenticated %}
+                <form method="post" action="{% url 'add_to_watchlist' %}" style="display: inline-block;">
+                    {% csrf_token %}
+                    <input type="hidden" name="movie_id" value="{{ movies.0.1.tmdb_id }}">
+                    <input class="btn btn-primary nav-button" type="submit" value="Add To Watchlist">
+                </form>
+                {% else %}
+                <button class="btn btn-primary nav-button" onclick="window.location.href='{% url 'login' %}?next={{ request.path }}'" style="display: inline-block;">Add to Watchlist</button>
+                {% endif %}
+                <!-- Button to Display Nearby Theaters Showing This Movie -->
+                <button class="btn btn-primary nav-button" onclick="theaterRedirect('{{ movies.0.1.title }}')" style="display: inline-block;">Theaters Near Me</button>
               </div>
+            
 
               <script>
                   function hideElement(movieId) {
@@ -188,19 +189,19 @@
               </div>
 
               <div>
-                  {% if user.is_authenticated %}
-                  <form method="post" action="{% url 'add_to_watchlist' %}">
-                      {% csrf_token %}
-                      <input type="hidden" name="movie_id" value="{{ movies.0.2.tmdb_id }}">
-                      <input class="btn btn-primary nav-button" type="submit" value="Add To Watchlist">
-                  </form>
-                  {% else %}
-                  <button class="btn btn-primary nav-button" onclick="window.location.href='{% url 'login' %}?next={{ request.path }}'">Add to Watchlist</button>
-                  {% endif %}
-                  <!-- Button to Display Nearby Theaters Showing This Movie -->
-                  <button class="btn btn-primary nav-button" onclick="theaterRedirect('{{ movies.0.2.title }}')">Theaters Near Me</button>
-              </div>
-
+                {% if user.is_authenticated %}
+                <form method="post" action="{% url 'add_to_watchlist' %}" style="display: inline-block;">
+                    {% csrf_token %}
+                    <input type="hidden" name="movie_id" value="{{ movies.0.2.tmdb_id }}">
+                    <input class="btn btn-primary nav-button" type="submit" value="Add To Watchlist">
+                </form>
+                {% else %}
+                <button class="btn btn-primary nav-button" onclick="window.location.href='{% url 'login' %}?next={{ request.path }}'" style="display: inline-block;">Add to Watchlist</button>
+                {% endif %}
+                <!-- Button to Display Nearby Theaters Showing This Movie -->
+                <button class="btn btn-primary nav-button" onclick="theaterRedirect('{{ movies.0.2.title }}')" style="display: inline-block;">Theaters Near Me</button>
+            </div>
+            
               <script>
                   function hideElement(movieId) {
                       console.log('Hide button clicked');
