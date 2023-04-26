@@ -7,10 +7,12 @@
     <title>Watchlist</title>
     {% load static %}
     <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet" />
+    <link href="{% static 'css/watchlist.css' %}" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
     <script src="{% static 'js/bootstrap.min.js' %}"></script>
 
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a class="navbar-brand" href="#" onclick="window.history.back()">TheatreLob</a>
+        <a class="navbar-brand" href="/">TheatreLob</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
@@ -21,32 +23,37 @@
       </nav>
   </head>
   <body >
-    <h1 class="text-center">Watchlist</h1>
+    <h1 class="text-center">Watch History</h1>
     <!-- list out all watched movies--> 
     <!-- make it be a grid -->
-    <div class="row">
-    {% for item in watched_items %}
-    <div class="card mb-3 border-primary " style="max-width: 19rem; background-size: cover;">
-      <img class="card-img" src="{{item.movie.movie_poster_url}}" alt="Card image cap">
-      <div class="card-body">
-        <h5 class="card-title">{{item.movie.title}}</h5>
-        <p class="card-text">{{item.movie.description}}</p>
-        <p class="card-text">Genres: 
-          {% for genre in item.movie.genres.all %}
-            {{ genre.name }}{% if not forloop.last %}, {% endif %}
-          {% endfor %}
-        </p>
-        <! -- add a button to remove from watchlist -->
-        <form method="post" action="{% url 'remove_from_watchlist' %}">
-        {% csrf_token %}
-        <input type="hidden" name="movie_id" value="{{ item.movie.tmdb_id }}">
-        <div class="col text-center">
-          <input type="submit" value="Remove from Watchlist" class="btn btn-primary btn-sm">
+    {% for group in watched_items %}
+    <div class="row"> 
+      <h5>{{ group.0.date_watched }} <hr/> </h5>
+      {% for item in group %}
+        <div class="container col-xs-6 col-md-2 col-sm-3">
+          <img class="card-img" src="{{item.movie.movie_poster_url}}" alt="poster">
+          <div class="quick-icons smaller bg-dark"> 
+            <div class="row justify-content-start">
+              <div class="col-4">
+              <form method="post" action="{% url 'remove_from_watchlist' %}">
+                {% csrf_token %}
+                <input type="hidden" name="movie_id" value="{{ item.movie.tmdb_id }}"> </input>
+                <button type="submit" class="btn btn-danger btn-sm rounded-0" data-toggle="tooltip" data-placement="top" title="Remove From Watchlist"> <i class="bi bi-x-octagon"></i> </i></button>
+              </form>
+            </div>
+            <div class="col-4">
+              <i class="bi bi-heart-fill"></i>
+            </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <h5 class="card-title text-center">{{item.movie.title}}</h5>
+            <p class="card-text"></p>
+            
+          </div>
         </div>
-
-      </div>
+      {% endfor %}
     </div>
     {% endfor %}
-    </div>
   </body>
 </html>

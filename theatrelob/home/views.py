@@ -55,21 +55,27 @@ def watchlist(request):
     # get the user's profile
     profile = UserProfile.objects.get(user_id=user_id)
     # get the user's watched items
-    watched_items = WatchedItem.objects.filter(profile=profile)
+    watched_items = WatchedItem.objects.filter(profile=profile).order_by('-date_watched').select_related('movie')
 
-    # Display movies with genres
-    movies_with_genres = []
+    movies = []
+    #group the movies by the same day watched
+    watched_items_grouped = []
+    current_date = None
     for watched_item in watched_items:
-        movie = watched_item.movie
-        genres_list = []
-        for genre in movie.genres.all():
-            genres_list.append(genre.name)
-        genres = ', '.join(genres_list)
-
-        movies_with_genres.append((movie, genres))
-
+        if current_date == None:
+            current_date = watched_item.date_watched
+            watched_items_grouped.append(watched_item)
+        elif current_date == watched_item.date_watched:
+            watched_items_grouped.append(watched_item)
+        else:
+            movies.append(watched_items_grouped)
+            watched_items_grouped = []
+            current_date = watched_item.date_watched
+            watched_items_grouped.append(watched_item)
+    
+    movies.append(watched_items_grouped)
     # display the watched items
-    return render(request, 'home/watchlist.html', {'watched_items': watched_items})
+    return render(request, 'home/watchlist.html', {'watched_items': movies})
 
 # Properply formatting the genre's name
 def format_genre_name(genre):
@@ -94,6 +100,7 @@ def remove_from_watchlist(request):
 
     # get the movie
     m = Movie.objects.get(tmdb_id=movie_id)
+    print("m: ", m)
 
     # remove the movie from the user's watchlist
     WatchedItem.objects.filter(profile=profile, movie=m).delete()
@@ -130,7 +137,8 @@ def add_to_watchlist(request):
 
             poster_url = 'https://image.tmdb.org/t/p/w500' + movie['poster_path']
             
-            m = Movie(tmdb_id=movie_id, title=movie['title'], description=movie['overview'], movie_poster_url=poster_url)
+            m = Movie(tmdb_id=movie_id, title=movie['title'], description=movie['overview'], movie_poster_url=poster_url, release_date=movie['release_date'], runtime=movie['runtime'], 
+                      rating=movie['vote_average'])
             m.save()
             
             # Correctly formatting and updating the generes
@@ -233,7 +241,7 @@ def api_search_and_add(request):
     # search for the movie
     with open('secrets.json') as f:
         secrets = json.load(f)
-        tmdb.API_KEY = secrets['tmd b_api_key']
+        tmdb.API_KEY = secrets['tmdb_api_key']
     search = tmdb.Search()
     response = search.movie(query=movie_title)
     if(len(search.results) == 0):

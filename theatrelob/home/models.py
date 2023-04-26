@@ -30,12 +30,11 @@ class Movie(models.Model):
     gross_earning_in_mil = models.IntegerField(null=True, blank=True)
     director = models.CharField(max_length=100, null=True, blank=True)
     actor = models.CharField(max_length=100, null=True, blank=True)
-    
     genres = models.ManyToManyField(Genre)
-
     language = models.CharField(max_length=100, null=True, blank=True)
     country = models.CharField(max_length=100, null=True, blank=True)
     tmdb_id = models.IntegerField()
+    release_date = models.DateField(null=True, blank=True)
 
     def __str__(self):
         return self.title
