@@ -2,10 +2,53 @@
 <html>
     <head>
         <title>Theaters Near Me</title>
+       
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
 
-        <script>
+        {% load static %}
+        <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet"/>
+        <link href="{% static 'css/style.css' %}" rel="stylesheet"/>
+
+        <script src="{% static 'js/bootstrap.min.js' %}"></script>
+
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <a class="navbar-brand" href="{% url 'index' %}">TheatreLob</a>
+
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Random Movie, Login, Register, and Logout buttons-->
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'randomrec' %}">Random Movie</a>
+                </li>
+
+                {% if user.is_authenticated %}
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit">Logout</button>
+                </form>
+                {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'login' %}">Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'register' %}">Register</a>
+                </li>
+                {% endif %}
+            </ul>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav"></ul>
+            </div>
+        </nav>
+
+         <script>
             // Initial bootstrap loader as recommended by Google Maps Platform
-            // Much of the initial code in the head element are recomended settings
+            // Most of the initial code in the head element is recomended settings
             (g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({
               key: "AIzaSyBeqij-KNScgFWmUslJryOY4u-yDhRem2s",
             });
@@ -13,14 +56,24 @@
 
         <style>
             #map {
+                float: left;
                 height: 100%;
-                width: 50%;
+                width: 45%;
+                margin: 1em;
             } /* Map widget styling */
 
+            #theaterList {
+                float: left;
+                height: 100%;
+                overflow-y: scroll;
+                width: 45%;
+                margin: 1em;
+                background-color: rgba(255, 196, 0, 0.877);
+                padding: 10px;
+            } /* Styling for list of theaters */
+
             html, body {
-              height: 100%;
-              margin: 10px;
-              padding: 0;
+                height: 100%;
             } /* HTML and body styling */
         </style>
 
@@ -29,18 +82,17 @@
         </script>
 
         <div id="map"></div>
+        <div id="theaterList"></div>
     </head>
 
     <body>
         <script>
-            var markers = [];
-            var searchRadius = '32186.88';
-
             function initMap() {
-                const urlParams = new URLSearchParams(window.location.search);
-                const movieTitle = urlParams.get('search');
+                const urlParams    = new URLSearchParams(window.location.search);
+                const movieTitle   = urlParams.get('search');
+                const movieShowing = "movie theaters showing " + movieTitle;
 
-                var movieShowing = "movie theaters showing " + movieTitle;
+                let searchRadius = 32186.88;
 
                 navigator.geolocation.getCurrentPosition(function(position){
                     var userLocation = {
@@ -48,32 +100,56 @@
                         lng: position.coords.longitude
                     }; // userLocation params
 
+                    var searchBounds = new google.maps.Circle({
+                        center: userLocation,
+                        radius: searchRadius
+                    }); // query bounds 
+
                     var map = new google.maps.Map(document.getElementById('map'), { 
                         center: userLocation,
-                        zoom: 8
+                        zoom: 9 
                     }); // map params
 
                     var service = new google.maps.places.PlacesService(map);
 
-                    service.textSearch({query: movieShowing, location: userLocation}, function(results, status){
+                    service.textSearch({query: movieShowing, bounds: searchBounds.getBounds()}, function(results, status){
+                        const body     = document.createElement('body');
+                        const header   = document.createElement('h1')
+                        const theaters = document.getElementById('theaterList');
+
+                        header.appendChild(document.createTextNode(`Nearby Theaters Showing ${movieTitle}`));
+                        body.appendChild(header);
+                        body.style.backgroundColor = 'rgba(255, 196, 0, 0.877)';
+
                         if (status === google.maps.places.PlacesServiceStatus.OK) {
-                            for (var i = 0; i < results.length; i++) {
+                            for (let i = 0; i < results.length; i++) {
                                 let place = results[i];
                                 let placeLocation = place.geometry.location;
                                 let placeMarker = new google.maps.Marker({
                                     map: map,
                                     position: placeLocation,
-                                    title: place.name
+                                    title: place.name,
                                 }); // placeMarker params
 
                                 placeMarker.addListener('click', function(){
                                     map.setCenter(placeMarker.getPosition());
                                     map.setZoom(15);
                                 }); // placeMarker listeners
-
-                                markers.push(placeMarker);
+                                
+                                const p = document.createElement('p');
+                                p.appendChild(document.createTextNode(`${placeMarker.title}`));
+                                body.appendChild(p);
                             } // for
                         } // then
+
+                        else {
+                            const p = document.createElement('p');
+                            p.appendChild(document.createTextNode(`No nearby theaters are showing this movie...`));
+                            body.appendChild(p);
+                        } // else
+
+                        theaters.appendChild(body);
+
                     }) // Google Maps service 
                 }) // navigator 
             } // Function initMap()

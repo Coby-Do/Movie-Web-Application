@@ -1,5 +1,6 @@
 <!DOCTYPE html>
+{% extends 'base.html' %}
 {% block content %}
     <h2>Movie Added</h2>
     <a href="{% url 'profile' username=request.user.username%}">Return to Profile</a>
-{% endblock %}
+{% endblock content %}

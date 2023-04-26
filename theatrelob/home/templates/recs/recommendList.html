@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{% extends 'base.html' %}
 {% block content %}
     <h2>Recommended Movies</h2>
     <h2> Recommended Movies By Metadata </h2>
@@ -37,12 +38,12 @@
         {% endfor %}
         </ul>
     <h2> End of Recommendations by Content (Plot)</h2>
-    <button>
-    <a href="{% url 'recommendList' %}">
-        Get more recommendations</a>
-    </button>
-    <button>
-    <a href="{% url 'profile' username=request.user.username%}">
-        Return to Profile.</a>
-    </button>
+    <div class="mb-3">
+    <a href="{% url 'recommendList' %}" class="btn btn-dark mb-2 d-block">
+        Get more Recommendations</a>
+    </div>
+    <div class="mb-3">
+    <a href="{% url 'profile' username=request.user.username%}" class="btn btn-dark mb-2 d-block">
+        Return to Profile</a>
+    </div>
 {% endblock %}

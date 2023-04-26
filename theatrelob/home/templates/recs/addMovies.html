@@ -1,11 +1,12 @@
 <!DOCTYPE html>
+{% extends 'base.html' %}
 {% block content %}
     <h2>Movie Recommendation</h2>
 
       {% if user.is_authenticated %}
         <form method="post" action="{% url 'recommendList' %}">
             {% csrf_token %}
-            <label for="user_movielist">Enter your movie list (comma separated):</label>
+            <label for="user_movielist">Enter a movie to recommend:</label>
             <input type="text" id="user_movielist" name="user_movielist" required>
             <button type="submit">Get Recommendations</button>
         </form>
