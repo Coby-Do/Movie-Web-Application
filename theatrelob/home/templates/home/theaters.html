@@ -2,51 +2,62 @@
 <html>
     <head>
         <title>Theaters Near Me</title>
-       
+
         <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-        <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
 
         {% load static %}
-        <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet"/>
-        <link href="{% static 'css/style.css' %}" rel="stylesheet"/>
+        <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet" />
+        <link href="{% static 'css/style.css' %}" rel="stylesheet" />
 
         <script src="{% static 'js/bootstrap.min.js' %}"></script>
 
+        <style>
+            .nav-button {
+                margin-right: 10px;
+            }
+            .navbar-brand-custom {
+                padding-left: 15px;
+            }
+        </style>
+        
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-            <a class="navbar-brand" href="{% url 'index' %}">TheatreLob</a>
-
+            <a class="navbar-brand navbar-brand-custom" href="{% url 'index' %}">TheatreLob</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-
-            <!-- Random Movie, Login, Register, and Logout buttons-->
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'randomrec' %}">Random Movie</a>
-                </li>
-
-                {% if user.is_authenticated %}
-                <form method="post" action="{% url 'logout' %}">
-                    {% csrf_token %}
-                    <button type="submit">Logout</button>
-                </form>
-                {% else %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'login' %}">Login</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'register' %}">Register</a>
-                </li>
-                {% endif %}
-            </ul>
-
-            <div class="collapse navbar-collapse" id="navbarNav">
+            <div class="collapse navbar-collapse d-flex justify-content-between" id="navbarNav">
                 <ul class="navbar-nav"></ul>
+                <ul class="navbar-nav">
+                    {% if request.user.is_authenticated %} 
+                    <li class="nav-item">
+                        <a href="{% url 'profile' username=request.user.username %}" class="btn btn-dark nav-button">
+                            Profile
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <form method="post" action="{% url 'logout' %}" class="form-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-dark nav-button">Logout</button>
+                        </form>
+                    </li>
+
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="btn btn-dark nav-button" href="{% url 'login' %}">Login</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="btn btn-dark nav-button" href="{% url 'register' %}">Register</a>
+                    </li>
+                    {% endif %}
+                </ul>
             </div>
         </nav>
 
-         <script>
+        <script>
             // Initial bootstrap loader as recommended by Google Maps Platform
             // Most of the initial code in the head element is recomended settings
             (g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({
@@ -92,18 +103,13 @@
                 const movieTitle   = urlParams.get('search');
                 const movieShowing = "movie theaters showing " + movieTitle;
 
-                let searchRadius = 32186.88;
+                var searchRadius = 50000;
 
                 navigator.geolocation.getCurrentPosition(function(position){
                     var userLocation = {
                         lat: position.coords.latitude,
                         lng: position.coords.longitude
                     }; // userLocation params
-
-                    var searchBounds = new google.maps.Circle({
-                        center: userLocation,
-                        radius: searchRadius
-                    }); // query bounds 
 
                     var map = new google.maps.Map(document.getElementById('map'), { 
                         center: userLocation,
@@ -112,14 +118,14 @@
 
                     var service = new google.maps.places.PlacesService(map);
 
-                    service.textSearch({query: movieShowing, bounds: searchBounds.getBounds()}, function(results, status){
+                    service.textSearch({query: movieShowing, location: userLocation, radius: searchRadius}, function(results, status){
                         const body     = document.createElement('body');
-                        const header   = document.createElement('h1')
+                        const header   = document.createElement('h1');
                         const theaters = document.getElementById('theaterList');
 
+                        body.style.backgroundColor = 'rgba(255, 196, 0, 0.877)';
                         header.appendChild(document.createTextNode(`Nearby Theaters Showing ${movieTitle}`));
                         body.appendChild(header);
-                        body.style.backgroundColor = 'rgba(255, 196, 0, 0.877)';
 
                         if (status === google.maps.places.PlacesServiceStatus.OK) {
                             for (let i = 0; i < results.length; i++) {
@@ -129,6 +135,9 @@
                                     map: map,
                                     position: placeLocation,
                                     title: place.name,
+                                    address: place.formatted_address,
+                                    rating: place.rating,
+                                    ratingCount: place.user_ratings_total
                                 }); // placeMarker params
 
                                 placeMarker.addListener('click', function(){
@@ -137,7 +146,15 @@
                                 }); // placeMarker listeners
                                 
                                 const p = document.createElement('p');
-                                p.appendChild(document.createTextNode(`${placeMarker.title}`));
+                                const a = document.createElement('a');
+                                a.setAttribute('href', "https://maps.google.com?q=" + encodeURIComponent(placeMarker.title));
+                                a.setAttribute('target', '_blank');
+                                a.appendChild(document.createTextNode(`${placeMarker.title}`));
+                                p.appendChild(a);
+                                p.appendChild(document.createElement('br'));
+                                p.appendChild(document.createTextNode(`Average Rating: ${placeMarker.rating} (${placeMarker.ratingCount} total ratings)`));
+                                p.appendChild(document.createElement('br'));
+                                p.appendChild(document.createTextNode(`Address: ${placeMarker.address}`));
                                 body.appendChild(p);
                             } // for
                         } // then
