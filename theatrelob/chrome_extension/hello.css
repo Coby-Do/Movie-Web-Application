@@ -1,0 +1,11 @@
+/* set css variable base on color scheme */
+body {background-color: #212529}
+h1 {color: #F4EEE0}
+/* set the background of text input */
+input[type=text] {background-color: #E69C24}
+
+input, select, textarea {color: #F4EEE0}
+
+button {background-color: #E69C24; margin-top: 10px}
+button, input[type=submit] {color: #F4EEE0}
+

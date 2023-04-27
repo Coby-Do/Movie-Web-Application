@@ -257,7 +257,8 @@ def api_search_and_add(request):
 
         poster_url = 'https://image.tmdb.org/t/p/w500' + movie['poster_path']
         
-        m = Movie(tmdb_id=movie_id, title=movie['title'], description=movie['overview'], movie_poster_url=poster_url)
+        m = Movie(tmdb_id=movie_id, title=movie['title'], description=movie['overview'], movie_poster_url=poster_url, release_date=movie['release_date'], runtime=movie['runtime'], 
+                      rating=movie['vote_average'])
         m.save()
         
         # Correctly formatting and updating the generes
@@ -763,7 +764,8 @@ def movie_search_add(request):
 
                 # Gets the poster url
                 poster_url = 'https://image.tmdb.org/t/p/w500' + movie['poster_path']
-                m = Movie(tmdb_id=movie_id, title=movie['title'], description=movie['overview'], movie_poster_url=poster_url)
+                m = Movie(tmdb_id=movie_id, title=movie['title'], description=movie['overview'], movie_poster_url=poster_url, release_date=movie['release_date'], runtime=movie['runtime'], 
+                      rating=movie['vote_average'])
 
                 m.save()
                 
